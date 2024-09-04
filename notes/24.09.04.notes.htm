@@ -15,7 +15,7 @@
 </head>
 <body>
   <div class="container larger">
-    <h3>Prompt for Wednesday, September 4</h3>
+    <h3>Notes for Wednesday, September 4</h3>
     <p>
       You can access these files from the <a href="https://github.com/jeffrz/info3300-fa2024">course Github repository</a>. The repository will be updated with notes shortly after class. While I encourage you to make use of a local copy of the repository so you can take notes, the version at this site will always be up-to-date and accessible. Execute a <tt>git pull</tt> in your repository directory to download new files. Prompt files won't change after posting, so feel free to modify them as you like. Here is an <a href="http://rogerdudler.github.io/git-guide/">informal guide to git</a>.
     </p>
@@ -48,7 +48,40 @@
     
     <!--- SVG goes here! --->
     
-    
+    <svg height=500 width=500 style="border:1px solid black; margin-bottom:50px;">
+      
+      <!--- Since spacing does not matter in SVG, I'm spacing out these elements for clarity --->
+      <!--- You don't have to do this in your homework --->
+      <circle cx="100" 
+              cy="250"
+              r="220"
+              stroke="darkred"
+              fill="red" />
+
+      <line x1="50" 
+            x2="400" 
+            y1="50" 
+            y2="200" 
+            stroke="limegreen" 
+            stroke-width="10" />
+
+      <rect x="100" 
+            y="50" 
+            width="100" 
+            height="50" 
+            style="fill:purple; stroke:yellow; stroke-width:5;" />
+      <!-- notice that style takes precedence over the HTML attributes! -->
+
+      <text x="100" 
+            y="200"
+            style="font: bold 20px sans-serif;"
+            dominant-baseline="hanging"
+            text-anchor="middle" 
+            fill="black" > 
+        CORNELL!
+      </text>
+
+    </svg>
 
 
     <h3>Paths</h3>
@@ -81,8 +114,15 @@
       <path style="stroke:#ccc; stroke-width:1" d="M 180 0 V 200" />
 
       <!--- Now let's draw a polygon --->
+      <!-- First one:  "Move to (10,10); put pen down and draw a horizontal line until x=50; draw a vertical line until y=30; draw a line to point (30,60); close the path by returning to the starting point" --->
+      <path style="stroke: limegreen; stroke-width:3px; fill: plum" 
+            d="M 10 10 H 50 V 30 L 30 60 Z" />
+            
+      <!-- Second one:  "Move to (50,50); put pen down and draw a horizontal line *that is 50px long*; draw a line to point (80,70); draw a line to point (100,90); draw a horizontal line until x=50; close the path by returning to the starting point" --->
+      <path style="stroke: orange; stroke-width:3px; fill: magenta" 
+            d="M 50 50 h 50 L 80 70 L 100 90 H 50 Z" />
       
-      
+      <!--- Try making your own here! --->
       
       
       
@@ -90,6 +130,7 @@
 
 
 
+    
 
     <h3>Transformations</h3>
 
@@ -99,52 +140,141 @@
 
     <br>
 
-    <p>First, let's mark the origin, (0,0).</p>
+    <p>First, let's mark the origin, (0,0). The g tag groups elements together.</p>
     
     
     <svg height="200" width="200">
       
+        <g>
+            <line x1="-6" x2="6" y1="0" y2="0" style="stroke: black"/>
+            <line y1="-6" y2="6" x1="0" x2="0" style="stroke: black"/>
+        </g>
+      
     </svg>
     
 
-    <p>Now let's move the origin to the center. The g tag assigns properties to sets of elements.</p>
+    <p>Now let's move the origin to the center. You can use a g tag to assign properties to sets of elements.</p>
     
+    <svg height="200" width="200">
+      
+        <g transform="translate(100,100)">
+            <line x1="-6" x2="6" y1="0" y2="0" style="stroke: black"/>
+            <line y1="-6" y2="6" x1="0" x2="0" style="stroke: black"/>
+        </g>
+      
+    </svg>
     
     
     
 
     <p>Let's create some circles in our translated space.</p>
+    <!---
+    <circle r="8" cx="0" cy="0" style="fill:???; opacity:0.6" />
+    <circle r="10" cx="-20" cy="-40" style="fill:???; opacity:0.6" />
+    <circle r="16" cx="-50" cy="-60" style="fill:???; opacity:0.6" \>
+    --->
     
     
+    <svg height="200" width="200">
+      
+        <g transform="translate(100,100)">
+            <line x1="-6" x2="6" y1="0" y2="0" style="stroke: black"/>
+            <line y1="-6" y2="6" x1="0" x2="0" style="stroke: black"/>
+            <circle r="8" cx="0" cy="0" style="fill:turquoise; opacity:0.6" />
+            <circle r="10" cx="-20" cy="-40" style="fill:magenta; opacity:0.6" />
+            <circle r="16" cx="-50" cy="-60" style="fill:cyan; opacity:0.6" \>
+        </g>
+      
+    </svg>
     
     
 
     <p>Let's perform a translation on one of the circles.</p>
     
+    <svg height="200" width="200">
+      
+        <g transform="translate(100,100)">
+            <line x1="-6" x2="6" y1="0" y2="0" style="stroke: black"/>
+            <line y1="-6" y2="6" x1="0" x2="0" style="stroke: black"/>
+            <circle r="8" cx="0" cy="0" transform="translate(50,0)" style="fill:turquoise; opacity:0.6" />
+            <circle r="10" cx="-20" cy="-40" style="fill:magenta; opacity:0.6" />
+            <circle r="16" cx="-50" cy="-60" style="fill:cyan; opacity:0.6" \>
+        </g>
+      
+    </svg>
     
     
     
 
     <p>Let's both perform a translation and scale one of the circles.</p>
     
-    
+    <svg height="200" width="200">
+      
+        <g transform="translate(100,100)">
+            <line x1="-6" x2="6" y1="0" y2="0" style="stroke: black"/>
+            <line y1="-6" y2="6" x1="0" x2="0" style="stroke: black"/>
+            
+            <circle r="8" cx="0" cy="0" transform="translate(50,0) scale(1.5)" style="fill:turquoise; opacity:0.6" />
+            <circle r="10" cx="-20" cy="-40" style="fill:magenta; opacity:0.6" />
+            <circle r="16" cx="-50" cy="-60" style="fill:cyan; opacity:0.6" \>
+        </g>
+      
+    </svg>
     
     
 
     <p>The order matters! What happens if we scale first and then perform a translation?</p>
     
-    
+    <svg height="200" width="200">
+      
+        <g transform="translate(100,100)">
+            <line x1="-6" x2="6" y1="0" y2="0" style="stroke: black"/>
+            <line y1="-6" y2="6" x1="0" x2="0" style="stroke: black"/>
+            
+            <circle r="8" cx="0" cy="0" transform="scale(1.5) translate(50,0)" style="fill:turquoise; opacity:0.6" />
+            <circle r="10" cx="-20" cy="-40" style="fill:magenta; opacity:0.6" />
+            <circle r="16" cx="-50" cy="-60" style="fill:cyan; opacity:0.6" \>
+        </g>
+      
+    </svg>
     
     
 
     <p>Finally, let's try rotating our coordinate system.</p>
     
-    
+    <svg height="200" width="200">
+      
+        <g transform="translate(100,100) rotate(45)">
+            <line x1="-6" x2="6" y1="0" y2="0" style="stroke: black"/>
+            <line y1="-6" y2="6" x1="0" x2="0" style="stroke: black"/>
+            
+            <circle r="8" cx="0" cy="0" transform="scale(1.5) translate(50,0)" style="fill:turquoise; opacity:0.6" />
+            <circle r="10" cx="-20" cy="-40" style="fill:magenta; opacity:0.6" />
+            <circle r="16" cx="-50" cy="-60" style="fill:cyan; opacity:0.6" \>
+        </g>
+      
+    </svg>
     
     
 
     <p>Note: It can be very confusing if you get the order wrong when rotate() gets involved!</p>
     
+    <svg height="200" width="200">
+      
+        <g transform="rotate(45) translate(100,100)">
+            <line x1="-6" x2="6" y1="0" y2="0" style="stroke: black"/>
+            <line y1="-6" y2="6" x1="0" x2="0" style="stroke: black"/>
+            
+            <circle r="8" cx="0" cy="0" transform="scale(1.5) translate(50,0)" style="fill:turquoise; opacity:0.6" />
+            <circle r="10" cx="-20" cy="-40" style="fill:magenta; opacity:0.6" />
+            <circle r="16" cx="-50" cy="-60" style="fill:cyan; opacity:0.6" \>
+        </g>
+      
+    </svg>
+    
+    <p>Takeaway: Transforms can include many commands separated by spaces. They are run starting at the end of the string, working backwards. For commands that do things with respect to the origin (scale, rotate), put them at the end. For commands that move points, put them at the start unless you know exactly why you need them at the end.</p>
+    
+    <p>For advanced users: Transforms are building up an affine transform matrix by running those commands. Because each command manipulates the matrix, they build on past commands. Some commands like translate just add terms to the matrix. Others multiply the matrix, introducing the origin dependency mentioned earlier. You can manually define the affine transform if you like -- check the SVG documentation for more details.</p>
     
     
     
