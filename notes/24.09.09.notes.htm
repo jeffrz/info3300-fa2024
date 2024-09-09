@@ -1,128 +1,222 @@
 <html><head>
-<title>INFO 3300 - September 9</title>
-
-  <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
-
-  <link rel="stylesheet" type="text/css" href="../css/normalize.css">
-  <link rel="stylesheet" type="text/css" href="../css/skeleton.css">
-  <link rel="stylesheet" type="text/css" href="../css/custom-style.css">
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
-  <link rel="stylesheet" href="../css/hljs-base16.css">
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+  <title>INFO 3300 - September 9</title>
   
-  <!--- D3 IMPORT HERE --->
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <!--- D3 IMPORT HERE --->
-
-  <style>
-
-  .hellodiv {
-    padding: 10px;
-    margin: 20px;
-  }
-
-  </style>
-
-</head>
-<body>
-  <div class="container larger">
-  <h3>Notes for September 9</h3>
-
-  <p>
-    Execute a <tt>git pull</tt> in your repository directory to download new files. Prompt files won't change after posting, so feel free to modify them as you like. Here once again is an <a href="http://rogerdudler.github.io/git-guide/">informal guide to git</a>.
-  </p>
-
-  <p>
-    To develop efficiently, have a local web server running. Python has a simple, built-in server. Use <tt>python -m http.server</tt> for python 3; use <tt>python -m SimpleHTTPServer 8000</tt> for python 2 (execute python in cmd for version number).
-  </p>
-
-  <p>
-  	<a href="https://d3js.org/">D3</a> is a library that makes it easy to create and manipulate page elements. It's not restricted to SVG elements, but that's what we'll usually use it for. We'll start by using d3 to select DOM elements, create new elements, and modify the content and appearance of elements.
-  </p>
-  <p>
-    You can find a bunch of D3 examples <a href="https://github.com/d3/d3/wiki/Gallery">here</a> and access <a href="https://github.com/d3/d3/blob/master/API.md">D3's online API reference</a>.
-  </p>
-  <p>
-    <a href="https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Selectors">Here</a> is a short guide on CSS selectors, which D3 uses for its "select" and "selectAll" functions.
-  </p>
-
-  <h5>HTML for today:</h5>
-
-  <div id="d1" class="hellodiv">Hello: DIV-1</div>
-  <div id="d2" class="hellodiv">Hello: DIV-2</div>
-  <div id="d3" class="hellodiv">Hello: DIV-3</div>
-
-  <svg height="250" width="250" style="background: black">
-    <!--- We're going to be populating this dynamically today --->
-  </svg>
-
-
-  <!-- This block will be automatically filled with syntax-highlighted code from the script below -->
-  <h5>Code for today:</h5>
-  <pre>
-    <code id="display" class="hljs language-javascript">
-    </code>
-  </pre>
-
-  <!--- Code for today's class --->
-  <script id="notes">
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
   
-  // New import! (see <head> of document)
+    <link rel="stylesheet" type="text/css" href="../css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="../css/skeleton.css">
+    <link rel="stylesheet" type="text/css" href="../css/custom-style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+    <link rel="stylesheet" href="../css/hljs-base16.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+    
+    <!--- D3 IMPORT HERE --->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!--- D3 IMPORT HERE --->
+  
+    <style>
+  
+    .hellodiv {
+      padding: 10px;
+      margin: 20px;
+    }
+  
+    </style>
+  
+  </head>
+  <body>
+    <div class="container larger">
+    <h3>Notes for September 9</h3>
+  
+    <p>
+      Execute a <tt>git pull</tt> in your repository directory to download new files. Prompt files won't change after posting, so feel free to modify them as you like. Here once again is an <a href="http://rogerdudler.github.io/git-guide/">informal guide to git</a>.
+    </p>
+  
+    <p>
+      To develop efficiently, have a local web server running. Python has a simple, built-in server. Use <tt>python -m http.server</tt> for python 3; use <tt>python -m SimpleHTTPServer 8000</tt> for python 2 (execute python in cmd for version number).
+    </p>
+  
+    <p>
+      <a href="https://d3js.org/">D3</a> is a library that makes it easy to create and manipulate page elements. It's not restricted to SVG elements, but that's what we'll usually use it for. We'll start by using d3 to select DOM elements, create new elements, and modify the content and appearance of elements.
+    </p>
+    <p>
+      You can find a bunch of D3 examples <a href="https://github.com/d3/d3/wiki/Gallery">here</a> and access <a href="https://github.com/d3/d3/blob/master/API.md">D3's online API reference</a>.
+    </p>
+    <p>
+      <a href="https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Selectors">Here</a> is a short guide on CSS selectors, which D3 uses for its "select" and "selectAll" functions.
+    </p>
+  
+    <h5>HTML for today:</h5>
+  
+    <div id="d1" class="hellodiv">Hello: DIV-1</div>
+    <div id="d2" class="hellodiv">Hello: DIV-2</div>
+    <div id="d3" class="hellodiv">Hello: DIV-3</div>
+  
+    <svg height="250" width="250" style="background: black">
+      <!--- We're going to be populating this dynamically today --->
+    </svg>
   
   
+    <!-- This block will be automatically filled with syntax-highlighted code from the script below -->
+    <h5>Code for today:</h5>
+    <pre>
+      <code id="display" class="hljs language-javascript">
+      </code>
+    </pre>
+  
+    <!--- Code for today's class --->
+    <script id="notes">
+    
+    
+    // New import! (see <head> of document)
+    // Data-driven documents = d3
+    console.log(d3);
+  
+    // 1. How can we select elements? What is the difference between select() and selectAll()?
+  
+    let div1 = document.getElementById("d1");
+    console.log(div1); // This is the traditional way to select elements
+    div1.innerHTML = "testing";
+    div1.style.color = "red";
+    
+    let d3div1 = d3.select("#d1"); // d3 accepts CSS style selector strings
+    console.log(d3div1); // Selecting using d3 lets you use its advanced features
+    
+    // d3 has human readable helper functions for property edits
+    d3div1.text("Isn't d3 amazing"); // Edit text
+    d3div1.style("color", "blue"); // Change CSS style
+    console.log(d3div1.style("color")); // Leave out second parameter for getter function
+    
+    // d3 can chain functions (many functions return the selector that went in so you can use it again)
+    //d3div1.text("Isn't d3 amazing?").style("color", "blue").style("background-color", "lightgrey").style("font-weight", "bold");
+    
+    // In practice it is good style to use returns to space out the chaining so it is more legible
+    d3div1.text("Isn't d3 amazing")
+        .style("color", "blue")
+        .style("background-color", "lightgrey")
+        .style("font-weight", "bold");
+    
+    // selectAll grabs all applicable elements
+    // COMMENTING THIS OUT SO NOTES REMAIN LEGIBLE  -  example of selectAll grabbing all divs by mistake
+    // let divs = d3.selectAll("div");
+    // divs.style("font-family", "Wingdings");
+    // BUT BE CAREFUL WITH SELECTORS - plain old div selected too much!
+    d3.selectAll("div.hellodiv").style("font-family", "Wingdings"); // We can chain functions!
+    
+    // 2a. How can we create new elements, and set their attributes and styles?
+    
+    // First we get the SVG canvas
+    let svg = d3.select("svg");
+    
+    svg.append("circle") // This creates a new circle element INSIDE svg
+        .attr("r", 10) // Keeps returning the same selection for more chaining
+        .attr("cx", 100) // When does this one execute? Before Y? After R?
+        .attr("cy", 100)
+        .style("fill", "purple")
+        .on("click", function() { console.log("Circles are the best shape"); });
+    // instead of .onclick or addEventListener, d3 uses on()
+    
+    // 2b. How do we create lots of elements (but not using data just yet)?
+    let colors = ["yellow", "blue", "pink", "green", "purple"];
+    
+    function randomPixel() {
+      return Math.random() * svg.attr("height");    }
+    
+    function randomColor() {
+      return colors[Math.floor(Math.random() * colors.length)]
+    }
+  
+    // C style loop
+    for (let i = 0; i < 100; i++) {
+      let x = randomPixel();
+      let y = randomPixel();
+      svg.append("circle")
+          .attr("r", 4)
+          .attr("cx", x )
+          .attr("cy", y )
+          .style("fill", "orange");
+    }
+    
+    // JS style loop
+    colors.forEach(  (d, i) => {
+      //the .forEach function is built into JS lists. It sends two parameters automatically to the function you give it
+      // the first parameter is the element it is currently on, and the second the index
+      // d and i are traditionally used, by anything can go there
+      // You can even just use a bare function() and forEach will just throw out the parameters
+      console.log(d, i);
+    
+      // We can also introduce some other random elements
+      let rad = Math.floor( 10 + Math.random() * 15 );
+    
+      svg.append("circle")
+          .attr("r", rad)
+          .attr("cx", randomPixel() ) // we get a new random pixel for each step of iteration
+          .attr("cy", randomPixel() )
+          .style("fill", d);
+    }); // Note the semicolon!
+    
+    
+    
+    // 3. How do we update the attributes of existing elements?
+    
+    // svg.selectAll("circle").style("fill", "red"); // give it a flat value to set it for all
+    
+    // Using .transition() signals that anything following in the chain should be animated
+    //  .delay and .duration adjust the animation
+    // You can change multiple things in one transition, but avoid using multiple .transition on the same DOM object
+    // svg.selectAll("circle")
+    //     .transition()
+    //     .delay(1000)
+    //     .duration(500) // wait 1 second, then spend 0.5s changing
+    //     .style("fill", "orange" ) 
+    // 
+    // // Transitions can be overwritten, so if you are going to use another one, make sure it happens AFTER the first is over
+    // // When is this block going to trigger? After first one? During first one?
+    // svg.selectAll("circle")
+    //     .transition()
+    //     .delay(2000)
+    //     .duration(600) // wait 2.0 second, then spend 0.6s changing
+    //     .style("fill", "blue");
+    
+    
+    // You can also give commands like .style a function, then it *runs* that function on *each* circle
+    svg.selectAll("circle")
+    // .style("fill", () => { console.log("function run"); return "red"; } );
+    // .style("fill", "red") 
+    
+    // Make sure that you provide a function and don't accidentally run it
+    d3.selectAll("circle")
+        .transition()
+        .delay(2600)
+        .duration(1000) // wait 2.6 second, then spend 1.0s changing
+        .attr("cx", randomPixel )
+        .attr("cy", randomPixel ); 
+        // ***** By giving this the *function* randomPixel without the (), it's called for each circle
+        //   In other words, d3's attr command checks if you gave it a function, if so, it runs it for each circle and assigns the result to the attr (like we did manually in the fill color above)
+    // This enables loop-like behavior which will be very useful soon
+    
+    
+    
+    </script>
   
   
-  // 1. How can we select elements? What is the difference between select() and selectAll()?
-
-
-
-
   
+    <!--- calls the highlight library to fill the <pre> tag with code --->
+    <script>
+    
+    function sanitize(s) {
+      return s.replace("<br>", "\\n")
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+            }
+      document.getElementById("display").innerHTML = sanitize( document.getElementById("notes").innerText);
+      hljs.highlightAll();
+    </script>
   
-  // 2a. How can we create new elements, and set their attributes and styles?
+    </div>
+  </body>
+  </html>
   
-  
-  
-  
-  // 2b. How do we create lots of elements (but not using data just yet)?
-  // let colors = ["yellow", "blue", "pink", "green"];
-  // 
-  // function randomPixel() {
-  //   return Math.random() * svg.attr("height");    }
-  // 
-  // function randomColor() {
-  //   return colors[Math.floor(Math.random() * colors.length)]
-  // }
-
-  
-  
-  
-  // 3. How do we update the attributes of existing elements?
-  
-  
-  
-  
-  
-
-  </script>
-
-
-
-  <!--- calls the highlight library to fill the <pre> tag with code --->
-  <script>
-  
-  function sanitize(s) {
-    return s.replace("<br>", "\\n")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-          }
-    document.getElementById("display").innerHTML = sanitize( document.getElementById("notes").innerText);
-    hljs.highlightAll();
-  </script>
-
-  </div>
-</body>
-</html>
