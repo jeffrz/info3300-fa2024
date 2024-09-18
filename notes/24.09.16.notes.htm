@@ -62,26 +62,26 @@
     
     // So how do we work with the data once it is loaded if JS just keeps on going?
     // We can add something to the promise to tell it what to do when the data comes back in!
-    var dataset; // If you think you'll need the data much later on, you can define a var...
-    d3.json('../datasets/titanic.json').then( (data) => {
+    // var dataset; // If you think you'll need the data much later on, you can define a var...
+    // d3.json('../datasets/titanic.json').then( (data) => {
       
-    // EVERYTHING having to do with the data variable has to go within this function
-    // Because it's asynchronous, JS is going to continue running stuff outside of the .then() while it waits
-    // For that reason, outside of .then() the code isn't going to know about the data variable    
+    // // EVERYTHING having to do with the data variable has to go within this function
+    // // Because it's asynchronous, JS is going to continue running stuff outside of the .then() while it waits
+    // // For that reason, outside of .then() the code isn't going to know about the data variable    
     
-      console.log(data);
-      dataset = data;  // ... and assign the data to it
+    //   console.log(data);
+    //   dataset = data;  // ... and assign the data to it
       
-    } );
+    // } );
     // console.log(data);
-    console.log(dataset);   //  but... because it's an async call it's going to return undefined outside of .then()
+    // console.log(dataset);   //  but... because it's an async call it's going to return undefined outside of .then()
                             //  (at least until .then() executes, then dataset has stuff in it)
                             
     
     // .then is triggered by the promise if it successfully calls back
     // otherwise an error may be recorded
-    d3.json('../datasets/titanics.json')
-      .then( (data) => { console.log('data', data); }, (error) => { console.log('error', error); } )
+    // d3.json('../datasets/titanics.json')
+    //   .then( (data) => { console.log('data', data); }, (error) => { console.log('error', error); } )
     
     // .then() is important because it allows us to work 'asynchronously' and not hold up the browser
     // We'll see another construction that's even more flexible later this term (async + await)
@@ -94,7 +94,7 @@
     const svg = d3.select('svg#scatterplot');
     const width = svg.attr('width');
     const height = svg.attr('height');
-    const margins = {top: 10, right: 10, bottom: 50, left: 50}; // You can also include quotes
+    const margins = {top: 10, right: 20, bottom: 50, left: 50}; // You can also include quotes
     const chartWidth = width - margins.left - margins.right;
     const chartHeight = height - margins.top - margins.bottom;
 
@@ -123,12 +123,19 @@
             
     // 2. Check for data issues
     // Let's fix some things up
+
+
     data.forEach( (d, i) => {
       d['life'] = Number(d['Life Expectancy']);
       d['gdp'] = Number(d['GDP/Person (PPP$)']);
       // d['pop'] = Number(d['Total Population']); // This will pump out NaNs. Why?
       d['pop'] = Number(d['Total Population'].replace(/,/g,'')); // Fix with replace for commas
     });
+
+    // See notes below #4
+    data = data.filter( (d) => {return d['gdp'] != 0 && d['life'] != 0 && d['pop'] != 0;}  );
+    console.log(data) 
+
 
     // 3. Let's build some scales
     const gdpExtent = d3.extent(data, d => d['gdp'] );
@@ -138,10 +145,10 @@
     const lifeExtent = d3.extent(data, d => d['life'] );
     const lifeScale = d3.scaleLinear().domain(lifeExtent)
                         .range([chartHeight, 0]); // Using the trick of switching the y max & min to make y positions easy
-
+    
     const popExtent = d3.extent(data, d => d['pop'] );
     const popScale = d3.scaleLinear().domain(popExtent)
-                                     .range([5,10]); // circle size
+                                     .range([5,15]); // circle size
     
     // Remember, the anonymous functions d => d['pop'] are just a shortcut for:
     //        (d) => { return d['pop']; }
@@ -149,38 +156,117 @@
     // You can change (d) => to d =>  if there is only one parameter going in
     // and you can change => { return d['pop']; } to => d['pop'] if you're immediately returning a value from the function
     
-    
+
     // 4. Start plotting circles and see what happens
-    
-    
-    
-    
-    
-    
+    data.forEach( (d, i) => {
+
+      chartArea.append('circle')
+          .attr('cx', gdpScale(d['gdp']))
+          .attr('cy', lifeScale(d['life']))
+          .attr('r', popScale(d['pop']))
+          .attr('opacity', 0.8)
+          .attr('index', i)  // I usually include the index as an extra attr so that if points look weird, I can find out what's going on in the dataset
+          .style('fill', 'steelblue');
+
+    });
+
+
+    // See that it looks VERY weird --
+    //  EXAMINED INDEX 177
+    // add:
+    // data = data.filter( (d) => {return d['gdp'] != 0;}  );
+    // This fixes a few points, but there are still 0s skewing our scales.
+    // Check again and find a life expectancy of 0 too which we have to fix
+    // data = data.filter( (d) => {return d['gdp'] != 0 && d['life'] != 0 && d['pop'] != 0;}  );
+
+    // array.filter is a builtin JS function
+    // It loops through the array, making a new array based on filter criteria
+    // You give it a function that takes in an object and returns true if it should stick around or false if the object should be eliminated by the filter
+    //  We use && here because we want to make sure our points have good values for ALL of those keys
+    //     data = data.filter( (d) => {return d['gdp'] != 0 && d['life'] != 0 && d['pop'] != 0;}  );
+
+    // We'll put the filter command before we set the scales
+
+
     // ---- 3
     // 5. Let's add some axes
     // We're going to use D3's axis tools to do it
-    
-    
-    
-    
+    let leftAxis = d3.axisLeft(lifeScale); // d3.axis____ functions return a *function* that pastes axis labels
+                                        //  on demand. You just run the function on a d3 selection and it
+                                        //  will insert all sorts of labels and markers for you
+    svg.append('g')
+    .attr('class', 'y axis')
+    .attr('transform',`translate(${margins.left-10},${margins.top})`) 
+    .call(leftAxis);
+
+    // Why do we use call? It's because axisBottom returns a function that we want to execute
+    // You can think of d3.axis as giving you a function that 'pastes' the axis labels into an element
+    //  By running the axis function on an SVG group, we 'paste' some new SVG elements into the group
+    // Call is just shorthand for 'run this function on the current entity we're chaining'
+    let bottomAxis = d3.axisBottom(gdpScale).ticks(6)  // .ticks tells it how many ticks to draw
+    let element = svg.append('g')
+                  .attr('class', 'y axis')
+                  .attr('transform',`translate(${margins.left},${chartHeight+margins.top+10})`)
+                  //.call(bottomAxis);
+    bottomAxis(element); // this is what .call(bottomAxis) actually does -- don't do it this way!
+
+
+
+
+    // So the process is:
+    //  Make a G tag where the axis will live. Use transform to move it where it needs to go
+    //  Make a d3.axis(scale) element  (such as d3.axisLeft(lifeScale)
+    //  Run .call(axisElement) on your G tag to 'paste' the axis HTML code into the G tag
+    //   (this is equivalent to running the axisElement on the G tag)
+
+
     // 5A. We can manually make some gridlines
     //  It would work fine for HW4, but I don't recommend it once you start using axis labels
-    
-    
-    
+
 
     // 5B. Or we can use axes in a clever way
-    
-    
-    
-    
-    
+    //  Create the axis
+    //   Configure it so that tickFormat is empty (don't make text labels)
+    //   Set tickSize to be a negative number, so instead of hanging below the chart the gridlined extend back into it
+
+    //  FINALLY, don't forget to use CSS to configure the gridlines a bit
+    //   See https://edstem.org/us/courses/64396/discussion/5303457
+    //   You will want to make the <line> elements a bit lighter and hide the element that has class .domain (that's the perpendicular line that connects the ticks)
+    //   See CSS in head of this file for example
+    let leftGridlines = d3.axisLeft(lifeScale)
+                        .tickSize(-chartWidth-10)
+                        .tickFormat('');
+    // Notice how we use a different class
+    svg.append('g')
+    .attr('class', 'y gridlines') // See CSS at top of file!!!
+    .attr('transform',`translate(${margins.left-10},${margins.top})`)
+    .call(leftGridlines);
+    // Make sure to set a gridlines class so you can distinguish it from your axes when styling
+
+
+    // The real benefit is that you can use the same configurations on your gridline axis that you used on your label axis. For example, we can put a tick number here
+    let bottomGridlines = d3.axisBottom(gdpScale)
+                          .tickSize(-chartHeight-10)
+                          .tickFormat('')
+                          .ticks(6); // Borrowing from our axis labels
+    svg.append('g')
+    .attr('class', 'x gridlines') // See CSS at top of file!!!
+    .attr('transform',`translate(${margins.left},${chartHeight+margins.top+10})`)
+    .call(bottomGridlines);
+
+
+    // NOTE: Our gridlines show up on top of the points right now. In practice you'll want to draw the circles last, or make an SVG group to hold the axes and then make your chart group after.
+
+    // What we did at the very end of class was cut out the chartArea append code and the circle code and paste it right here so it would be on top
+
+    // An EVEN EASIER way would be to just use the build-in d3 command, raise, which "raises" things to the top of the SVG stack
+    //  We can do that here to put the circles on top
+    chartArea.raise()
+
     // Next up: filtering, legends, and advanced formatting
     
-    
 
-  })
+  });
 
 
   </script>
