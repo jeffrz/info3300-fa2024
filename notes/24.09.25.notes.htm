@@ -111,13 +111,31 @@
     
     
     // 1. Old way
-  
+    let elements = demo.selectAll("circle")
+                       .data(circles);
     
+    elements.exit()   // exit -> remove
+            .remove();
+    console.log(elements.enter())
+    
+    elements.enter() // enter -> add new
+            .append("circle")
+            .attr("r", 20)
+            .merge(elements) // update
+            .attr("cx", d => d.x )
+            .attr("cy", d => d.y )
+            .attr("fill", d => colorScale(d.age) )
     
     
     // 2. New way - shorthand version
-    
-    
+    demo.selectAll("circle.purpleCircles").data(circles)
+        .join("circle")
+        .attr("class", "purpleCircle")
+        .attr("r", 20)
+        .attr("cx", d => d.x )
+        .attr("cy", d => d.y )
+        .attr("fill", d => colorScale(d.age) )
+
        
        
     // 3. New way - extended version
@@ -218,18 +236,25 @@
     
   
   // CONVERT TO USE A DATA JOIN
-  data.forEach( (d, i) => {
+  // data.forEach( (d, i) => {
     
-    let circle = chartArea.append("circle")
-        .attr("cx", yearScale(d['year']))
-        .attr("cy", grossScale(d['worldwide_gross']+1))
-        .attr("r", imdbScale(d['imdb_rating']))
-        .attr("opacity", 0.8)
-        .attr("label", d["title"])  
+  //   let circle = chartArea.append("circle")
+  //       .attr("cx", yearScale(d['year']))
+  //       .attr("cy", grossScale(d['worldwide_gross']+1))
+  //       .attr("r", imdbScale(d['imdb_rating']))
+  //       .attr("opacity", 0.8)
+  //       .attr("label", d["title"])  
 
-  });
+  // });
   // done with forEach
-  
+  let circles = chartArea.selectAll("circle").data(data)
+                         .join("circle")
+                         .attr("cx", d => yearScale(d['year']))
+                         .attr("cy", d => grossScale(d['worldwide_gross']+1))
+                         .attr("r", d => imdbScale(d['imdb_rating']))
+                         .attr("opacity", 0.8)
+                         .attr("label", d => d["title"])  
+
   
   });
   
