@@ -1,151 +1,317 @@
 <html><head>
-<title>INFO 3300 - September 30</title>
-
-  <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
+  <title>INFO 3300 - September 30</title>
   
-  <link rel="stylesheet" type="text/css" href="../css/normalize.css">
-  <link rel="stylesheet" type="text/css" href="../css/skeleton.css">
-  <link rel="stylesheet" type="text/css" href="../css/custom-style.css">
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
-  <link rel="stylesheet" href="../css/hljs-base16.css">
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
-  
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  
-  <style>
-  
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
     
-
-  </style>
-
-</head>
-<body>
-  <div class="container larger">
-  <h3>Notes for September 30</h3>
-  <p>
-    The dataset on this page comes from an interesting <a href="https://www.kaggle.com/ucsandiego/carbon-dioxide">dataset on Kaggle</a> about atmospheric CO2 concentrations. I'm using it for demo purposes and can't speak to the veracity of the data.
-  </p>
-  <p>
-    Today we're looking at d3 line plots. They also use a data join, but it's a bit trickier to implement. <a href="https://github.com/d3/d3-shape">Here</a> is some documentation on d3.shape, the library used for making line charts, and <a href="https://github.com/d3/d3-time-format">here</a> is the documentation on d3.time. Recall what we learned at the start of class on SVG <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths">paths</a>.
-  </p>
-  <p>
-    If you examine old examples of d3 mouseovers, you may see them using d3.mouse(). That changed in version 6. You can read <a href="https://observablehq.com/@d3/d3v6-migration-guide#pointer">this guide</a> to learn how to translate older v5 examples.
-  </p>
-  <p>
-    If you're still confused about why we use translate and G tags in layout out charts, Mike Bostock has a <a href="https://bl.ocks.org/mbostock/3019563">handy page discussing chart margins</a>.
-  </p>
-
-  <h5>HTML for today:</h5>
-  
-  <svg id="lineplot" height="500" width="800" style="margin-top:50px" >
-  </svg>
-  
-
-
-  <!-- This block will be automatically filled with syntax-highlighted code from the script below -->
-  <h5>Code for today:</h5>
-  <pre>
-    <code id="display1" class="hljs javascript">
-    </code>
-  </pre>
-
-  <!--- Code for today's class --->
-  <script id="notes1">
-
-  // Do the usual things to set up the chart area and incorporate margins
-  const svg = d3.select("svg#lineplot");
-  const width = svg.attr("width");
-  const height = svg.attr("height");
-  const margin = {top: 10, right: 10, bottom: 50, left: 50};
-  const chartWidth = width - margin.left - margin.right;
-  const chartHeight = height - margin.top - margin.bottom;
-
-  let annotations = svg.append("g").attr("id","annotations");
-  let chartArea = svg.append("g").attr("id","points")
-                  .attr("transform",`translate(${margin.left},${margin.top})`);
-
-  // Import some CSV data
-  d3.csv("../datasets/co2.csv", d3.autoType)
-    .then( (data) => {
+    <link rel="stylesheet" type="text/css" href="../css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="../css/skeleton.css">
+    <link rel="stylesheet" type="text/css" href="../css/custom-style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+    <link rel="stylesheet" href="../css/hljs-base16.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+    
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+    <style>
+    
+    
+    .gridlines .domain {
+      display: none;
+    }
+    
+    .gridlines line {
+      stroke: #aaa;
+    }
       
-  // 1. Check data quality
-  console.log(data)
+  
+    </style>
+  
+  </head>
+  <body>
+    <div class="container larger">
+    <h3>Notes for September 30</h3>
+    <p>
+      The dataset on this page comes from an interesting <a href="https://www.kaggle.com/ucsandiego/carbon-dioxide">dataset on Kaggle</a> about atmospheric CO2 concentrations. I'm using it for demo purposes and can't speak to the veracity of the data.
+    </p>
+    <p>
+      Today we're looking at d3 line plots. They also use a data join, but it's a bit trickier to implement. <a href="https://github.com/d3/d3-shape">Here</a> is some documentation on d3.shape, the library used for making line charts, and <a href="https://github.com/d3/d3-time-format">here</a> is the documentation on d3.time. Recall what we learned at the start of class on SVG <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths">paths</a>.
+    </p>
+    <p>
+      If you examine old examples of d3 mouseovers, you may see them using d3.mouse(). That changed in version 6. You can read <a href="https://observablehq.com/@d3/d3v6-migration-guide#pointer">this guide</a> to learn how to translate older v5 examples.
+    </p>
+    <p>
+      If you're still confused about why we use translate and G tags in layout out charts, Mike Bostock has a <a href="https://bl.ocks.org/mbostock/3019563">handy page discussing chart margins</a>.
+    </p>
+  
+    <h5>HTML for today:</h5>
+    
+    <svg id="lineplot" height="500" width="800" style="margin-top:50px" >
+    </svg>
+    
   
   
-  // 2. Scales, axes, and gridlines
+    <!-- This block will be automatically filled with syntax-highlighted code from the script below -->
+    <h5>Code for today:</h5>
+    <pre>
+      <code id="display1" class="hljs javascript">
+      </code>
+    </pre>
   
-  // Y Axis  
-  // I'll take care of the easy one for us
-  const carbonExtent = d3.extent(data, d => d['Carbon Dioxide (ppm)']);
-  const carbonScale = d3.scaleLinear().domain(carbonExtent).range([chartHeight, 0]);
+    <!--- Code for today's class --->
+    <script id="notes1">
   
-  let leftAxis = d3.axisLeft(carbonScale)
-  let leftGridlines = d3.axisLeft(carbonScale)
-                        .tickSize(-chartWidth-10)
-                        .tickFormat("")
-  annotations.append("g")
-             .attr("class", "y axis")
-             .attr("transform",`translate(${margin.left-10},${margin.top})`)
-             .call(leftAxis)
-  annotations.append("g")
-             .attr("class", "y gridlines")
-             .attr("transform",`translate(${margin.left-10},${margin.top})`)
-             .call(leftGridlines);
-
-  // X Axis
+    // Do the usual things to set up the chart area and incorporate margins
+    const svg = d3.select("svg#lineplot");
+    const width = svg.attr("width");
+    const height = svg.attr("height");
+    const margin = {top: 10, right: 10, bottom: 50, left: 50};
+    const chartWidth = width - margin.left - margin.right;
+    const chartHeight = height - margin.top - margin.bottom;
+  
+    let annotations = svg.append("g").attr("id","annotations");
+    let chartArea = svg.append("g").attr("id","points")
+                    .attr("transform",`translate(${margin.left},${margin.top})`);
+  
+    // Import some CSV data
+    d3.csv("../datasets/co2.csv", d3.autoType)
+      .then( (data) => {
+        
+    // 1. Check data quality
+    //    Mercifully, the data import cleanly (because I already did some cleanup in Excel!)
+    //      but... we need dates to work correctly -- for this we need JS Date objects
+    console.log(data);
+  
+    // Make some Date objects
+    // "2008-4-1" ---> %Y-%m-%d pattern
+    const timeParser = d3.timeParse('%Y-%m-%d');
+    data.forEach( d => {
+      d['date'] = timeParser(d["String Date"]);
+    });
+  
+    // 2. Scales, axes, and gridlines
+  
+    // Y axis
+    //  First one is easy
+    const carbonExtent = d3.extent(data, d => d['Carbon Dioxide (ppm)']);
+    const carbonScale = d3.scaleLinear().domain(carbonExtent).range([chartHeight, 0]);
+    let leftAxis = d3.axisLeft(carbonScale)
+    let leftGridlines = d3.axisLeft(carbonScale)
+                          .tickSize(-chartWidth-10)
+                          .tickFormat("")
+    annotations.append("g")
+      .attr("class", "y axis")
+      .attr("transform",`translate(${margin.left-10},${margin.top})`)
+      .call(leftAxis)
+    annotations.append("g")
+      .attr("class", "y gridlines")
+      .attr("transform",`translate(${margin.left-10},${margin.top})`)
+      .call(leftGridlines);
+  
+    // X axis
+    // Second, we need to spread dates across the X axis
+    // Since we made JS date objects, we can use the usual D3 functions and a .scaleTime()
+    const dateExtent = d3.extent(data, d => d['date']);
+    const dateScale = d3.scaleTime().domain(dateExtent).range([0,chartWidth]);
+    let bottomAxis = d3.axisBottom(dateScale)
+    let bottomGridlines = d3.axisBottom(dateScale)
+                            .tickSize(-chartHeight-10)
+                            .tickFormat("")
+    annotations.append("g")
+      .attr("class", "x axis")
+      .attr("transform",`translate(${margin.left},${chartHeight+margin.top+10})`)
+      .call(bottomAxis);
+    annotations.append("g")
+      .attr("class", "x gridlines")
+      .attr("transform",`translate(${margin.left},${chartHeight+margin.top+10})`)
+      .call(bottomGridlines);
   
   
-  // 3. Before we start drawing, we need a line generator
-  //  this will help us to draw the path based on data, which otherwise is very complicated
+    // 3. Before we start drawing, we need a line generator
+    //  this will help us to draw the path based on data, which otherwise is very complicated
+    // NOTE: The line generator does not take in any data at this stage
+    //  We're just "programming" it to know what to do when you hand it data
+    //  In other words, we're saying "when you get a data point, here's what your X value should be" using functions
+    var lineGen = d3.line()
+                    .x( d => dateScale(d['date']) )
+                    .y( d => carbonScale(d['Carbon Dioxide (ppm)']) )
+                    .curve(d3.curveMonotoneX);  // this configures whether straight lines connect your data points
+                                                //  or if it blends between points using a curve; see d3.line docs
+  
+    // 4. Append a <path>, bind the data, and run the generator 
+    //  The generator is "run" in the last command.
+    chartArea.append("path")
+             .datum(data)
+             .attr("class", "line")
+             .attr("fill", "none")   // using attr here, style would work too
+             .attr("stroke", "steelblue")
+             .attr("stroke-width", 3)
+             .attr("d", lineGen);
+             // .datum has given our entire dataset to the <path> element
+             // so, because lineGen is a _function_, the .attr("d", lineGen) command is really working like
+             //    a data-based .attr call, such as .attr("d", d => lineGen(d)). Because we've put the whole dataset
+             //    into the <path> element, this works out so that we're really saying lineGen(data)
+             // if you're unsure what's really happening, try running console.log(lineGen(data))
+  
+  
+    // 5. Let's add some circles too!
+    chartArea.selectAll("circle").data(data)
+             .join("circle")
+             .attr("r", 3)
+             .attr("fill", "navy")   // using attr here, style would work too
+             .attr("cx", d => dateScale(d['date']) )
+             .attr("cy", d => carbonScale(d['Carbon Dioxide (ppm)']) );
   
   
   
-  // 4. Append a <path>, bind the data, and run the generator 
   
   
   
-  // 5. Let's add some circles too!
+    // 6. Stretch goal - add a detailed mouseover
+    // THIS WAS NOT DEMO-ED IN CLASS -- feel free to check out the code to see a neat interaction
+    // Begin by switching out the commented sections and mousing over circles and other parts
+    // You'll notice how the interaction doesn't work everywhere. Then comment it back out
+    //  and uncomment the activeRegion part and beyond -- it will enable whitespace hovers
+    // Check documentation for bisect if curious
+  
+    // Add marker lines, circles, and label to use in our mouseovers
+    let mouseGroup = chartArea.append("g");
+    let xMarker = mouseGroup.append("line")
+      .attr("id","xMarker")
+      .attr("fill","none")
+      .attr("stroke","black")
+      .attr("stroke-width",1)
+      .attr("y1",0)
+      .attr("y2",chartHeight)
+      .attr("visibility","hidden");
+  
+    let valueMarker = mouseGroup.append("circle")
+      .attr("id","valueMarker")
+      .attr("fill","none")
+      .attr("stroke","black")
+      .attr("stroke-width",2)
+      .attr("r",10)
+      .attr("visibility","hidden");
+  
+    let label = mouseGroup.append("text")
+      .attr("id","label")
+      .attr("visibility","hidden");
   
   
+    // Start simple - just see if we can make valueMarker track the mouse
+    // This won't work because it only seems to move correctly when there is stuff on the canvas
+    // For empty spaces it won't work because of the way mousemove is handled on SVG
+    // chartArea.on("mousemove", function(evt) {
+    //   console.log(evt);
+    //   let location = d3.pointer(evt);
+    //   console.log(location);
+    //   valueMarker.attr("visibility", "")
+    //              .attr("cx",location[0])
+    //              .attr("cy",location[1]);
+    // });
   
   
+    // // Instead, we have to resort to a more complicated solution
+    // // We paint an active region on the chart that is invisible but "catches" the mouse events for us
+    let activeRegion = mouseGroup.append("rect")
+      .attr("id","activeRegion")
+      .attr("width",chartWidth)
+      .attr("height",chartHeight)
+      .attr("fill","none")
+      .attr("pointer-events","all");
+      
+    // activeRegion is now the top-most item (even if invisible), so it should always catch the mouse events and never clash
+    // We will do some housekeeping to turn on and off the mouseover annotations when the mouse leaves or enters activeRegion
   
-  // STRETCH GOAL HERE
+    // When the mouse enters, show the annotations
+    activeRegion.on("mouseover", function() {
+      xMarker.attr("visibility","");
+      valueMarker.attr("visibility","");
+      label.attr("visibility",""); 
+    });
+  
+    // When the mouse leaves, hide the annotations
+    activeRegion.on("mouseout", function() {
+      xMarker.attr("visibility","hidden");
+      valueMarker.attr("visibility","hidden");
+      label.attr("visibility","hidden"); 
+    });
+    
+    
+    // In order to make our mouseovers a bit more grounded, let's find the data point that is closest to the mouse location
+    // We'll need a way to find the closest point to a specific date (from where the mouse is on the X axis)
+    // Refer to the docs on bisector to see how this works -- for now just know this is a common pattern for finding the closest value in an array
+    let findDate = d3.bisector( d => d.date ).right;
+  
+    activeRegion.on("mousemove", function(evt) {
+      // Update the position as you move
+  
+      // Get mouse location
+      let location = d3.pointer(evt);
+      let x = location[0];
+      // Use "invert" on a scale to go from pixels back to data
+      let xDate = dateScale.invert(x);
+      // We use the bisector to find the index of the element that's closest to our xDate
+      let index = findDate(data, xDate);
+      // We can then get d, the data point that's closest
+      let d = data[index];
+  
+      // From there, it's just a matter of updating positions using our scales like we've done for a while now
+      let xPos = dateScale(d['date']);
+      let yPos = carbonScale(d['Carbon Dioxide (ppm)']);
+  
+      xMarker.attr("x1",xPos).attr("x2",xPos);
+      valueMarker.attr("cx",xPos).attr("cy",yPos);
+  
+      let txt = d['Carbon Dioxide (ppm)']
+  
+      // We started with the following line, which has lots of overlaps
+      // label.attr("x",xPos).attr("y",yPos).text(txt); 
+  
+      // Here's a simple way to remove overlaps and deliver a consistent user experience
+      label.text(txt); 
+      if (xPos < chartWidth / 2.0) { 
+        label.attr("x",xPos+4).attr("y",100).attr("text-anchor","start");
+      }
+      else { 
+        label.attr("x",xPos-4).attr("y",chartHeight-100).attr("text-anchor","end"); 
+      }
   
   
+    });
+    
+    // end of .then()
+    });  
+    
+    
+    
+    
+    
+    
+    </script>
+    
+    
+    
+    
+    
+    
   
-  // end of .then()
-  });  
+    <!--- calls the highlight library to fill the <pre> tag with code --->
+    <script>
+    
+    function sanitize(s) {
+      return s.replace("<br>", "\\n")
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+            }
+      document.getElementById("display1").innerHTML = sanitize( document.getElementById("notes1").innerText);
+      hljs.highlightAll();
+    </script>
   
   
+    </div>
+  </body>
+  </html>
   
-  
-  
-  
-  </script>
-  
-  
-  
-  
-  
-  
-
-  <!--- calls the highlight library to fill the <pre> tag with code --->
-  <script>
-  
-  function sanitize(s) {
-    return s.replace("<br>", "\\n")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-          }
-    document.getElementById("display1").innerHTML = sanitize( document.getElementById("notes1").innerText);
-    hljs.highlightAll();
-  </script>
-
-
-  </div>
-</body>
-</html>
