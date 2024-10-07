@@ -16,6 +16,9 @@
   <style>
   
   
+  .state {
+      fill: lightgrey;
+    }
   
   
 
@@ -70,35 +73,51 @@
                   
   // 0. Let's explore a new way to use promises for data imports that might be a bit cleaner when importing lots of files
   
+  // const testFunc = async function() {
+  //   return "hello";  
+  //   // because we added async, we have access to new, useful keywords...
+  // }
+  // console.log(testFunc()); // notice that this now returns a Promise object!
+  // console.log("Mango");
   
-  
-  
-  
+
   // 1. An async function to load data and build the map
-  
-  
+  // We use async functions because they give access to *await* which can make code a lot easier to read
+  // See docs here: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function
+
+  // * Start by making an anonymous async function which will contain most or all of your code *
+  // * Make sure to run the function after you make it (see bottom of file) *
+  // *** If it seems like nothing is happening, make sure you are running it ***
+  // * Then use await instead of .then()  -- see line 110
+  const requestData = async function() {
+
     // 2. Draw a map of US using topoJSON
     // 2a. Import data as synchronous call to topoJSON data file
     // Care of Mike Bostock:
     //   "../datasets/us-smaller.json"
-    
-    
-  
+    const us = await d3.json("../datasets/us-smaller.json");
+    console.log(us);
+
     // 2b. Pick out topographic features and build d3 helpers
+    var states = topojson.feature(us, us.objects.states);     // List of state outlines to fill
+    var projection = d3.geoAlbersUsa().fitSize([mapWidth, mapHeight], states);
+    var path = d3.geoPath().projection(projection);
+    console.log(states);
+    console.log(statesMesh);
+    
+    // We can try a few different projections, including:
+    //   .geoOrthographic()  .geoStereographic()   .geoMercator()
     
     
-    
-    
-    // 2c. Draw states and outlines
-    
-    
-       
-   // 2d. Add a graticule (we did this after 2c, but it must go here)
-   //      (Graticules are much more configurable, but we'll use the default for now)
+    // 2c. Draw states and outlines (see CSS at the top)
+    let statePaths = map.selectAll("path.state").data(states.features)
+                    .join("path")
+                    .attr("class", "state")
+                    .attr("note", d => d.id)  // debugging
+                    .attr("d", path)
    
-   
-   
-   
+    // 2d. Add a graticule (we did this after 2c, but it must go here)
+    //      (Graticules are much more configurable, but we'll use the default for now)
    
   
     // 3a. Import survey data as synchronous calls
@@ -173,7 +192,8 @@
     
     
   // END OF REQUESTDATA()
-  
+  }
+  requestData();
   
   
   
