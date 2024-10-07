@@ -103,7 +103,6 @@
     var projection = d3.geoAlbersUsa().fitSize([mapWidth, mapHeight], states);
     var path = d3.geoPath().projection(projection);
     console.log(states);
-    console.log(statesMesh);
     
     // We can try a few different projections, including:
     //   .geoOrthographic()  .geoStereographic()   .geoMercator()
