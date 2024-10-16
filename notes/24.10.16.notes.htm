@@ -1,167 +1,287 @@
 <html><head>
-<title>INFO 3300 - October 16</title>
-
-  <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
+  <title>INFO 3300 - October 16</title>
   
-  <link rel="stylesheet" type="text/css" href="../css/normalize.css">
-  <link rel="stylesheet" type="text/css" href="../css/skeleton.css">
-  <link rel="stylesheet" type="text/css" href="../css/custom-style.css">
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
-  <link rel="stylesheet" href="../css/hljs-base16.css">
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
+    
+    <link rel="stylesheet" type="text/css" href="../css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="../css/skeleton.css">
+    <link rel="stylesheet" type="text/css" href="../css/custom-style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+    <link rel="stylesheet" href="../css/hljs-base16.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+    
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+    
+    <style>
+    
+    .neighborhood {
+        fill: #EEE;
+        stroke: white;
+        stroke-width: 2px;
+    }
+    
+    .nation {
+      fill: #ddd;
+    }
   
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="https://d3js.org/topojson.v3.min.js"></script>
+    .outline {
+      stroke: #fff;
+      stroke-width: 1px;
+      fill: none;
+    }
   
-  <style>
+    </style>
   
+  </head>
+  <body>
+    <div class="container larger">
+    <h3>Notes for October 16</h3>
+    <p>
+      Today's data (both geoJSON and CSV) for the first SVG come from the <a href="https://datasf.org/opendata/">DataSF</a> municipal open data initiative. I used <a href="https://mapshaper.org/">mapShaper</a> to convert the geoJSON file into a topoJSON file (which is much smaller for reasons discussed during the first geo coding lecture).
+    </p>
+    <p>
+      The second SVG will make use of a <a href="https://www.kaggle.com/datafiniti/fast-food-restaurants/data">fast food dataset</a> from Kaggle.
+    </p>
+    <p>
+      For contour mapping (whether using geography or not), it's better to keep the <a href="https://github.com/topojson/topojson">TopoJSON</a> import around. More on <a href="https://github.com/d3/d3-contour">d3.contour</a>. Here is a <a href="https://observablehq.com/@d3/volcano-contours">contour example</a> and a <a href="https://observablehq.com/@d3/density-contours">density example</a>.
+    </p>
   
-  .nation {
-    fill: #ddd;
-  }
-
-  .outline {
-    stroke: #fff;
-    stroke-width: 1px;
-    fill: none;
-  }
-
-  </style>
-
-</head>
-<body>
-  <div class="container larger">
-  <h3>Notes for October 16</h3>
-  <p>
-    Today's data (both geoJSON and CSV) for the first SVG come from the <a href="https://datasf.org/opendata/">DataSF</a> municipal open data initiative. I used <a href="https://mapshaper.org/">mapShaper</a> to convert the geoJSON file into a topoJSON file (which is much smaller for reasons discussed during the first geo coding lecture).
-  </p>
-  <p>
-    The second SVG will make use of a <a href="https://www.kaggle.com/datafiniti/fast-food-restaurants/data">fast food dataset</a> from Kaggle.
-  </p>
-  <p>
-    For contour mapping (whether using geography or not), it's better to keep the <a href="https://github.com/topojson/topojson">TopoJSON</a> import around. More on <a href="https://github.com/d3/d3-contour">d3.contour</a>. Here is a <a href="https://observablehq.com/@d3/volcano-contours">contour example</a> and a <a href="https://observablehq.com/@d3/density-contours">density example</a>.
-  </p>
-
-  <h5>HTML for today:</h5>
-
-  <svg id="sfmap" height="900" width="900" style="background: #fff; margin-top:50px" >
-
-  </svg>
+    <h5>HTML for today:</h5>
   
-  <p>Contour map:</p>
-  <svg id="fastfood" height="610" width="975" style="background: #fff; margin-top:50px" >
-
-  </svg>
+    <svg id="sfmap" height="900" width="900" style="background: #fff; margin-top:50px" >
   
-
-  <!-- This block will be automatically filled with syntax-highlighted code from the script below -->
-  <h5>Code for today:</h5>
-  <pre>
-    <code id="display1" class="hljs javascript">
-    </code>
-  </pre>
-
-
-  <!--- Code for today's class --->
-  <script id="notes1">
-
-  const svg = d3.select("#sfmap");
-  const width = svg.attr("width");
-  const height = svg.attr("height");
-  const margin = { top: 20, right: 20, bottom: 20, left:20};
-  const mapWidth = width - margin.left - margin.right;
-  const mapHeight = height - margin.top - margin.bottom;
-  const map = svg.append("g")
-                  .attr("transform","translate("+margin.left+","+margin.top+")");
-
-  // Let's make a map of all of the municipal trees in San Francisco
-  // With any luck, we ought to be able to visualize the streets/blocks in the city, since trees line them
-  //   (this is really just an excuse to make a lot of dots)
+    </svg>
+    
+    <p>Contour map:</p>
+    <svg id="fastfood" height="610" width="975" style="background: #fff; margin-top:50px" >
   
-  // Datasets for today:
-  //  "../datasets/SF-Neighborhoods.json"
-  //  "../datasets/Street_Tree_List_smaller.csv"
-
-
-  // 1. Make the dot map visualization
-  //  (refer to previous notes for more comments on async functions)
+    </svg>
+    
+  
+    <!-- This block will be automatically filled with syntax-highlighted code from the script below -->
+    <h5>Code for today:</h5>
+    <pre>
+      <code id="display1" class="hljs javascript">
+      </code>
+    </pre>
+    <pre>
+      <code id="display2" class="hljs javascript">
+      </code>
+    </pre>
   
   
+    <!--- Code for today's class --->
+    <script id="notes1">
+  
+    const svg = d3.select("#sfmap");
+    const width = svg.attr("width");
+    const height = svg.attr("height");
+    const margin = { top: 20, right: 20, bottom: 20, left:20};
+    const mapWidth = width - margin.left - margin.right;
+    const mapHeight = height - margin.top - margin.bottom;
+    const map = svg.append("g")
+                    .attr("transform","translate("+margin.left+","+margin.top+")");
+  
+    // Let's make a map of all of the municipal trees in San Francisco
+    // With any luck, we ought to be able to visualize the streets/blocks in the city, since trees line them
+    //   (this is really just an excuse to make a lot of dots)
+    
+    // Datasets for today:
+    //  "../datasets/SF-Neighborhoods.json"
+    //  "../datasets/Street_Tree_List_smaller.csv"
   
   
-  </script>
+    // 1. Make the dot map visualization
+    //  (refer to previous notes for more comments on async functions)
+    const requestData = async function() {
+      
+      const sf = await d3.json("../datasets/SF-Neighborhoods.json");
+      console.log(sf);
+      
+      // We find that the feature we want to visualize is the SFNeighborhoods property within objects
+      //  Always search .objects for different features to show in a topoJSON dataset
+      var neighborhoods = topojson.feature(sf, sf.objects.SFNeighborhoods);
+      
+      // We use Mercator projection instead of a "better" projection because it's more familiar
+      // It also leads to a flat line on the bottom of the city and a even road grid due to how
+      // the projection makes all latitude lines flat and keeps angles consistent
+      var projection = d3.geoMercator().fitSize([mapWidth, mapHeight], neighborhoods);
+      var path = d3.geoPath().projection(projection);
+      
+      // Draw neighborhoods
+      // Just as in our line generators, the scale is used by the generator to take complex data and
+      //  generate fancy paths
+      map.selectAll("path.neighborhood").data(neighborhoods.features)
+        .join("path")
+        .attr("class", "neighborhood")
+        .attr("d", path);
+        
+        
+      // Import tree dataset
+      const trees = await d3.csv("../datasets/Street_Tree_List_smaller.csv");
+      
+      // We need to figure out where to position the dots. Since we may have a lot of them, let's process
+      //  the data ahead of time and add to our dict
+      trees.forEach( d => {
+        
+        // Use the projection just like a scale to convert from lng/lat to pixels
+        // Make ABSOLUTELY SURE to use longitude, latitude order here -- reversing them gives weird results
+        d.Position = projection( [d.Longitude, d.Latitude] );
+        
+      });
+      // (If we instead did this during the join then we would have to call projection() twice, 
+      //     once for 'cx' and once for 'cy' -- this is a 2x performance cost)
+      
+      // Draw circles using the Positions we just made
+      map.selectAll("circle").data(trees)
+         .join("circle")
+         .attr("r", 1)
+         .attr("fill", "forestgreen")
+         .attr("opacity", 0.4)
+         .attr("cx", d => d.Position[0])
+         .attr("cy", d => d.Position[1]);
+      
+    }
+    requestData();
+    
+    
+    
+    </script>
+    
+    <script id="notes2">
+    // Fast food map
+    const ffsvg = d3.select("#fastfood");
+    const ffwidth = ffsvg.attr("width");
+    const ffheight = ffsvg.attr("height");
+    const ffmapWidth = ffwidth;
+    const ffmapHeight = ffheight;
+    // No margins here since our US map already has a specific projection to match to size
+    const ffmap = ffsvg.append("g");
   
-  <script id="notes1">
-  // Fast food map
-  const ffsvg = d3.select("#fastfood");
-  const ffwidth = ffsvg.attr("width");
-  const ffheight = ffsvg.attr("height");
-  const ffmapWidth = ffwidth;
-  const ffmapHeight = ffheight;
-  // No margins here since our US map already has a specific projection to match to size
-  const ffmap = ffsvg.append("g");
-
-  // 2. Make a contour map
+    // 2. Make a contour map
+    
+    const requestDataFF = async function() {
+      
+      // We'll use the same map and projection as in the 03-26 notes
+      const us = await d3.json("../datasets/counties-10m.json");
+      var projection = d3.geoAlbersUsa().scale(1300).translate([487.5, 305]);
+                  // NOTICE: You can customize the projection using .scale and .translate
+      var path = d3.geoPath().projection(projection);
+      var nation = topojson.feature(us, us.objects.nation);
+      var statesMesh = topojson.mesh(us, us.objects.states);
+      
+      // Draw nation and state outlines
+      ffmap.selectAll("path.nation").data(nation.features)
+           .join("path")
+           .attr("class", "nation")
+           .attr("d", path);
+       ffmap.append("path").datum(statesMesh)
+            .attr("class","outline")
+            .attr("d", path);
+      // No counties this time
+         
   
-  // const requestDataFF = async function() {
-  //   // For best results with this projection, we should use a 610x975px canvas and also
-  //   //   add the specific suggested settings
-  //   // Some map files come with specific recommendations for projection/dimensions!
-  //   const us = await d3.json("../datasets/counties-10m.json");
-  //   var projection = d3.geoAlbersUsa().scale(1300).translate([487.5, 305]);
-  //               // NOTICE: You can customize the projection using .scale and .translate
-  //   var path = d3.geoPath().projection(projection);
-  //   var nation = topojson.feature(us, us.objects.nation);
-  //   var statesMesh = topojson.mesh(us, us.objects.states);
-  // 
-  //   // Draw nation and state outlines
-  //   ffmap.selectAll("path.nation").data(nation.features)
-  //        .join("path")
-  //        .attr("class", "nation")
-  //        .attr("d", path);
-  //    ffmap.append("path").datum(statesMesh)
-  //         .attr("class","outline")
-  //         .attr("d", path);
-  // 
-  //   // Now import our fastfood dataset
-  //   var fastfood = await d3.csv("../datasets/fastfood.csv", d3.autoType);
-  //   console.log(fastfood)
-  // 
-  // 
-  // 
-  //   // // We can show the circles to see whether our densities are plausible
-  //   // ffmap.selectAll("circle.dot").data(fastfood)
-  //   //      .join("circle")
-  //   //      .attr("class","dot")
-  //   //      .attr("r", 2)
-  //   //      .attr("fill", "darkgrey")
-  //   //      .attr("opacity", 0.2)
-  //   //      .attr("cx", d => d.position[0])
-  //   //      .attr("cy", d => d.position[1]);
-  // 
-  // 
-  // }
-  // requestDataFF();
+      // Now import our fastfood dataset
+      var fastfood = await d3.csv("../datasets/fastfood.csv", d3.autoType);
+      console.log(fastfood)
+      
+      // We're going to draw contours today. For contours, working by PIXEL
+      // coords rather than lat/lng is going to be the best approach 
+      // We do the same conversion as we did in the dot chart...
+      fastfood.forEach( (d, i) => {
+        // Use the projection just like a scale to convert from lng/lat to pixels
+        d.position = projection( [d.longitude, d.latitude] );
+      });
+      
+      // ** Make a contour generator **
+      // You'll see two kinds in the documentation, d3.contour() and d3.contourDensity
+      // -Use d3.contour when you have *values* spread across space and want to show them
+      // -Use contourDensity when you have *points* spread over space and want to show
+      //   *how many* there are in a given location compared to other locations
+      // Like other shape generators, you're programming a function that takes in a
+      //  dataset and does something fancy to it to generate shapes
+      let contourGen = d3.contourDensity()
+                         .x( d => d.position[0] )        // point x position (best in pixels)
+                         .y( d => d.position[1] )        // point y position (best in pixels)
+                         .size( [ffwidth, ffheight] )    // size of canvas
+                         .thresholds( 10 );              // number of "levels" you want
+      
+      // Now run the contour generator on your dataset
+      let contours = contourGen(fastfood);
+      
+      // Check out what kind of data you get...
+      console.log(contours)
+      // It's actually a topoJSON featureCollection!
+      // A contour generator creates fake geographic data to use to draw contours
+      // We know how to work with these kinds of things...
+      
+      // Let's make a color scale for the density contours
+      // Our topoJSON has an extra key for each feature, value, that is the density
+      //  value for that particular contour in the list -- we can use extent to figure
+      //  out the min and max density levels so we can apply a color scale
+      let valueExtent = d3.extent(contours, d => d.value);
+      let colorScale = d3.scaleSequential(d3.interpolateViridis).domain(valueExtent)
+      
+      let layer = ffmap.append("g");
+      
+      // Sidenote: The array of features that contourDensity gives you have been carefully
+      //  ordered so that the big, low density ones will be earlier in the list -- this
+      //  guarantees that they'll be drawn *underneath* the higher densities in a join
+      layer.selectAll("path.contours")
+           .data(contours)
+           .join("path")
+           .attr("class", 'contours')
+           .attr("fill", d => colorScale(d.value) )
+           .attr("d", d3.geoPath())  
+              // NOTE: We create a new d3.geoPath because we have already converted our 
+              //  locations into pixels. We don't need a projection in our geoPath now
+              
+      // But how do we make sure the user can still see the map details and state borders?
+      // layer.attr("opacity", 0.5)   // This doesn't work too well to show map details...
+      
+      // Better is to layer some stuff on top of the contours!
+      ffmap.append("path").datum(statesMesh)
+           .attr("class","outline")
+           .attr("opacity", 0.5)
+           .attr("d", path);
+      
+      // // We can show the circles to see whether our densities are plausible
+      // ffmap.selectAll("circle.dot").data(fastfood)
+      //      .join("circle")
+      //      .attr("class","dot")
+      //      .attr("r", 2)
+      //      .attr("fill", "darkgrey")
+      //      .attr("opacity", 0.2)
+      //      .attr("cx", d => d.position[0])
+      //      .attr("cy", d => d.position[1]);
+      
+      
+    }
+    requestDataFF();
+    
+    </script>
+    
   
-  </script>
+    <!--- calls the highlight library to fill the <pre> tag with code --->
+    <script>
+    
+    function sanitize(s) {
+      return s.replace("<br>", "\\n")
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+            }
+      document.getElementById("display1").innerHTML = sanitize( document.getElementById("notes1").innerText);
+      hljs.highlightAll();
+      document.getElementById("display2").innerHTML = sanitize( document.getElementById("notes2").innerText);
+      hljs.highlightAll();
+    </script>
   
-
-  <!--- calls the highlight library to fill the <pre> tag with code --->
-  <script>
   
-  function sanitize(s) {
-    return s.replace("<br>", "\\n")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-          }
-    document.getElementById("display1").innerHTML = sanitize( document.getElementById("notes1").innerText);
-    hljs.highlightAll();
-  </script>
-
-
-  </div>
-</body>
-</html>
+    </div>
+  </body>
+  </html>
+  
