@@ -121,18 +121,48 @@
 
 
     
-    // 1. PAN/ZOOM BEGINS HERE
+    // PAN/ZOOM BEGINS HERE   (OK, Zoomer)
 
-    chartArea.selectAll("circle.point").data(data)
-             .join("circle").attr("class","point")
-             .attr("cx", d => xScale(d['gdp']))
-             .attr("cy", d => yScale(d['life']))
-             .attr("r", d => popScale(d['pop']))
-             .attr("opacity", 0.8)
-             .style("fill", d => regScale(d.Region));
+    let viewport = chartArea.append("g");
+    viewport.selectAll("circle.point").data(data)
+       .join("circle").attr("class","point")
+           .attr("cx", d => xScale(d['gdp']))
+           .attr("cy", d => yScale(d['life']))
+           .attr("r", d => popScale(d['pop']))
+           .attr("opacity", 0.8)
+           .style("fill", d => regScale(d.Region));
+    
+    var plotZoom = d3.zoom().on("zoom", plotZoomed);
+    
+    plot.call(plotZoom);
     
     
+    // As with other events, plotZoomed receives one parameter, *event*  (i.e. plotZoomed(event)  ) and can get *this*
+    function plotZoomed(event) {    
+
+      console.log(event.transform);
+      console.log(event.transform.toString()); // notice how CONVENIENT toString is!
+      
+      viewport.attr("transform", event.transform); // implicitly calls toString when coercing
+
+      // update the scales on the axes/gridlines
+      // rescale does not modify the source scale, just creates an adjusted copy
+      yAxis.scale(event.transform.rescaleY(yScale))
+      xAxis.scale(event.transform.rescaleX(xScale))
+      yGridlines.scale(event.transform.rescaleY(yScale))
+      xGridlines.scale(event.transform.rescaleX(xScale))
+
+      // apply new scaled axes (do not use a transition since zoom triggers so many events!)
+      d3.select("g.y.axis").call(yAxis);
+      d3.select("g.x.axis").call(xAxis);
+      d3.select("g.y.gridlines").call(yGridlines);
+      d3.select("g.x.gridlines").call(xGridlines);
+   }
+
+   // At end of 10/21 lecture, we still have some issues with this demo. What are they?
     
+    
+
 
   }
   drawPlot();
