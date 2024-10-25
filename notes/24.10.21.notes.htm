@@ -157,6 +157,12 @@
         d3.select("g.x.axis").call(xAxis);
         d3.select("g.y.gridlines").call(yGridlines);
         d3.select("g.x.gridlines").call(xGridlines);
+
+
+        // Make the circles shrink to match the zoom level so they 
+        //  keep their apparent (pixel-level) size
+        viewport.selectAll("circle.point")
+                .attr("r", d => popScale(d['pop']) / event.transform.k)
      }
   
      // get rid of circles all over the place with a clip-path
