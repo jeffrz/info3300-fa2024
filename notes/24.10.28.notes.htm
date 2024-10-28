@@ -67,7 +67,7 @@
     const requestData = async () => {
 
       // Dataset of titanic survivors from a much earlier lecture
-      const passengers = await d3.json("../datasets/titanic.json");
+      let passengers = await d3.json("../datasets/titanic.json");
       const passengers_copy = await d3.json("../datasets/titanic.json");
       const passengers_by_class = await d3.json("../datasets/titanic.json");
 
@@ -106,28 +106,123 @@
 
       // --- Notes from class ---
       
+      // passengers = passengers.slice(0,200);
+      console.log(passengers);
       
+
+      // BONUS: Before setting its phyllotaxis arrangement, forceSimulation will check to see if you've already assigned d.x and d.y
+      // Here we can put points in random places so they don't appear off screen
+      // d3 won't overwrite these when you make the forceSimulation, and will just start using them when the sim begins
+      passengers.forEach( d => {
+        d.x = d3.randomUniform(10,allWidth-10)();
+        d.y = d3.randomUniform(10,allHeight-10)();
+      });
       
+      // Moved making circles back up here due to BONUS code
+      let circles = allLayer.selectAll("circle").data(passengers)
+                            .join("circle")
+                            .attr("r", 2)
+                            .attr("cx", d => d.x )
+                            .attr("cy", d => d.y )
+                            .attr("fill", d => mortalityScale(d.mortality) );
       
+      // Simulation of physics for bubble plot
+      //  Forces: attract vertically to midpoint, attract horizontally to correct age, points collide / resist overlaps
+      var passengerSimulation = d3.forceSimulation()
+                                      // .nodes(arrayOfObjects)
+                                  .nodes(passengers)
+                                      // .force(name, forceObject)
+                                  // "magnetic" pull on y axis
+                                  .force("ypos", d3.forceY()
+                                                   .strength( 0.05 )
+                                                   .y( allHeight/2.0 ) )
+                                  // "magnetic" pull on x axis
+                                  .force("xpos", d3.forceX()
+                                                   .strength( 0.05 )
+                                                   .x(  d => ageScale(d.age) ) )
+                                  // force to prevent points from overlapping
+                                  .force("collision", d3.forceCollide()
+                                                        .radius(2.5) // trick to add gaps
+                                                        .iterations(2) )
+                                  .on("tick", updateAllPassengerPositions);
+                                  // Called each "tick" of the simulation, like a frame of animation
+                                  // Your job is to update the appearance to match the simulation
       
-      
-      
-      
-      
-      
+      // Tick function to keep SVG in sync with simulation running asynchronously
+      function updateAllPassengerPositions() {
+          circles.attr("cx", d => d.x).attr("cy", d => d.y);
+      }
+
       // Handle the buttons provided in the HTML
       d3.select("#play").on("click", () => {
         // Start animating the simulation
+        passengerSimulation.restart(); // clears the "alpha" value and starts fresh
+
       });
       d3.select("#stop").on("click", () => {
         // Pause the simulation animation
+          passengerSimulation.stop(); // pauses sim
+
       });
       d3.select("#tick").on("click", () => {
         // Move the simulation one "tick"
+          passengerSimulation.tick(); // moves one frame forward, but doesn't trigger tick event
+          updateAllPassengerPositions(); // manually update circles
+
       });
       d3.select("#rand").on("click", () => {
         // Randomize positions and restart the simulation
+          passengerSimulation.restart(); 
+          passengerSimulation.stop(); // then stop sim so we can reposition without issue
+          passengerSimulation.alpha(1); // "reheat" the simulation -- more on this later
+          passengers.forEach( d => {
+            d.x = d3.randomUniform(10,allWidth-10)();
+            d.y = d3.randomUniform(10,allHeight-10)();
+          });
+          updateAllPassengerPositions(); // manually update appearance
+
       });
+
+
+      // NOW SPLIT BY CABIN CLASS
+      // Let's run the class version before rendering it
+      //   Data file is passengers_by_class -- need to use a fresh file because forceSimulation mutates data
+      
+      // Initialize a force model for passengers
+      let classSimulation = d3.forceSimulation()
+                              .nodes(passengers_by_class)
+                            // force to prevent points from overlapping
+                             .force("collision", d3.forceCollide()
+                                                   .radius(2)
+                                                   .iterations(3) )
+                            // "magnetic" pull on x axis
+                            .force("xpos", d3.forceX()
+                                             .x( d => ageScale(d.age) )
+                                             .strength( 0.3 ) )
+                            // "magnetic" pull on y axis
+                            .force("ypos", d3.forceY()
+                                             .y( d => classScale(d.class) )
+                                             .strength( 0.3 ) )
+                            .stop();
+
+      // ** How can we run the simulation "behind the scenes" and just show the results?
+      // To do so, we need to learn how simulations "solve" the physics over time
+
+      // TBD in class
+
+
+
+      // When complete, draw the points in their final location
+      classLayer.selectAll("circle").data(passengers_by_class)
+              .enter().append("circle")
+              .attr("r", 1.5)
+              .attr("cx", d => d.x)
+              .attr("cy", d => d.y)
+              .attr("fill", d => mortalityScale(d.mortality));
+
+      
+      
+
 
 
 
