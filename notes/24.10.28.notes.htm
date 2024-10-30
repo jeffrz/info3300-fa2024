@@ -1,258 +1,299 @@
 <html><head>
-<title>INFO 3300 - October 28</title>
-
-  <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
+  <title>INFO 3300 - October 28</title>
   
-  <link rel="stylesheet" type="text/css" href="../css/normalize.css">
-  <link rel="stylesheet" type="text/css" href="../css/skeleton.css">
-  <link rel="stylesheet" type="text/css" href="../css/custom-style.css">
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
-  <link rel="stylesheet" href="../css/hljs-base16.css">
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
-  
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  
-  <style>
-  
-  line.dashed {
-    stroke: #aaa;
-    stroke-width: 1px;
-    stroke-dasharray: 2;
-  }
-  text.axis {
-    text-anchor: end;
-    font-variant: all-small-caps;
-  }
-  
-  </style>
-
-</head>
-<body>
-  <div class="container larger">
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
     
-    <h3>Notes for October 28</h3>
-    <p>Check out the documentation for <a href="https://d3js.org/d3-force">d3.force</a>.</p>
-    <p>If you want to deal with non-circular collision hulls or other advanced physics things, you will want a <a href="https://github.com/bebraw/jswiki/wiki/Physics-libraries">physics engine</a>. That said, <a href="https://observablehq.com/@d3/force-directed-lattice?collection=@d3/d3-force">a lot can be done in d3</a> with careful implementation work.</p>
-
-  <h5>HTML for today:</h5>
-
-  <svg id="all-passengers" height="200" width="600" style="background: #fff; margin-top:50px" >
-  </svg>
-  <div>
-  <button id="play">Play</button>
-  <button id="stop">Stop</button>
-  <button id="tick">Tick</button>
-  <button id="rand">Randomize</button>
-  </div>
-
-  <svg id="by-class" height="400" width="600" style="background: #fff; margin-top:50px" >
+    <link rel="stylesheet" type="text/css" href="../css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="../css/skeleton.css">
+    <link rel="stylesheet" type="text/css" href="../css/custom-style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+    <link rel="stylesheet" href="../css/hljs-base16.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+    
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+    <style>
+    
+    line.dashed {
+      stroke: #aaa;
+      stroke-width: 1px;
+      stroke-dasharray: 2;
+    }
+    text.axis {
+      text-anchor: end;
+      font-variant: all-small-caps;
+    }
+    
+    </style>
+  
+  </head>
+  <body>
+    <div class="container larger">
+      
+      <h3>Notes for October 28</h3>
+      <p>Check out the documentation for <a href="https://d3js.org/d3-force">d3.force</a>.</p>
+      <p>If you want to deal with non-circular collision hulls or other advanced physics things, you will want a <a href="https://github.com/bebraw/jswiki/wiki/Physics-libraries">physics engine</a>. That said, <a href="https://observablehq.com/@d3/force-directed-lattice?collection=@d3/d3-force">a lot can be done in d3</a> with careful implementation work.</p>
+  
+    <h5>HTML for today:</h5>
+  
+    <svg id="all-passengers" height="200" width="600" style="background: #fff; margin-top:50px" >
     </svg>
-
-
-  <!-- This block will be automatically filled with syntax-highlighted code from the script below -->
-  <h5>Code for today:</h5>
-  <pre>
-    <code id="display1" class="hljs javascript">
-    </code>
-  </pre>
-  <pre>
-    <code id="display2" class="hljs javascript">
-    </code>
-  </pre>
-
+    <div>
+    <button id="play">Play</button>
+    <button id="stop">Stop</button>
+    <button id="tick">Tick</button>
+    <button id="rand">Randomize</button>
+    </div>
   
-
-    <script id="notes1">
+    <svg id="by-class" height="400" width="600" style="background: #fff; margin-top:50px" >
+      </svg>
+  
+    <!-- This block will be automatically filled with syntax-highlighted code from the script below -->
+    <h5>Code for today:</h5>
+    <pre>
+      <code id="display1" class="hljs javascript">
+      </code>
+    </pre>
+    <pre>
+      <code id="display2" class="hljs javascript">
+      </code>
+    </pre>
+  
     
-    const requestData = async () => {
-
-      // Dataset of titanic survivors from a much earlier lecture
-      let passengers = await d3.json("../datasets/titanic.json");
-      const passengers_copy = await d3.json("../datasets/titanic.json");
-      const passengers_by_class = await d3.json("../datasets/titanic.json");
-
-      // Build some scales
-      const ageExtent = d3.extent(passengers, d=>d.age);
-      const ageScale = d3.scaleLinear().domain(ageExtent).range([50,550]);
-      const mortalityScale = d3.scaleOrdinal().domain(["survived","died"]).range(["#259dc3","#c61530"]);
-      const classScale = d3.scalePoint().domain(["first","second","third"]).range([50,300]);
-
-      // Add some light line indicators
-      d3.select("#all-passengers").append("line").attr("x1",ageScale(ageExtent[0])).attr("x2",ageScale(ageExtent[1]))
-                                                 .attr("y1",100).attr("y2",100).attr("class","dashed");
-      d3.select("#by-class").append("line").attr("x1",ageScale(ageExtent[0])).attr("x2",ageScale(ageExtent[1]))
-                                          .attr("y1",classScale("first")).attr("y2",classScale("first")).attr("class","dashed");
-      d3.select("#by-class").append("line").attr("x1",ageScale(ageExtent[0])).attr("x2",ageScale(ageExtent[1]))
-                                       .attr("y1",classScale("second")).attr("y2",classScale("second")).attr("class","dashed");
-      d3.select("#by-class").append("line").attr("x1",ageScale(ageExtent[0])).attr("x2",ageScale(ageExtent[1]))
-                                .attr("y1",classScale("third")).attr("y2",classScale("third")).attr("class","dashed");
-      d3.select("#by-class").append("text").text("first").attr("class","axis").attr("x",45).attr("y",classScale("first"));
-      d3.select("#by-class").append("text").text("second").attr("class","axis").attr("x",45).attr("y",classScale("second"));
-      d3.select("#by-class").append("text").text("third").attr("class","axis").attr("x",45).attr("y",classScale("third"));
-
-      // Axes to show age
-      var ageAxis = d3.axisBottom(ageScale);
-      d3.select("#all-passengers").append("g").attr("transform","translate(0,170)").call(ageAxis);
-      d3.select("#by-class").append("g").attr("transform","translate(0,370)").call(ageAxis);
-
-      // Layers for drawing
-      let allLayer = d3.select("#all-passengers").append("g");
-      let allWidth = d3.select("#all-passengers").attr("width");
-      let allHeight = d3.select("#all-passengers").attr("height");
-      let classLayer = d3.select("#by-class").append("g");
-      let classWidth = d3.select("#by-class").attr("width");
-      let classHeight = d3.select("#by-class").attr("height");
-
-
-      // --- Notes from class ---
+  
+      <script id="notes1">
       
-      // passengers = passengers.slice(0,200);
-      console.log(passengers);
+      const requestData = async () => {
+  
+        // Dataset of titanic survivors from a much earlier lecture
+        let passengers = await d3.json("../datasets/titanic.json");
+        const passengers_copy = await d3.json("../datasets/titanic.json");
+        const passengers_by_class = await d3.json("../datasets/titanic.json");
+  
+        // Build some scales
+        const ageExtent = d3.extent(passengers, d=>d.age);
+        const ageScale = d3.scaleLinear().domain(ageExtent).range([50,550]);
+        const mortalityScale = d3.scaleOrdinal().domain(["survived","died"]).range(["#259dc3","#c61530"]);
+        const classScale = d3.scalePoint().domain(["first","second","third"]).range([50,300]);
+  
+        // Add some light line indicators
+        d3.select("#all-passengers").append("line").attr("x1",ageScale(ageExtent[0])).attr("x2",ageScale(ageExtent[1]))
+                                                   .attr("y1",100).attr("y2",100).attr("class","dashed");
+        d3.select("#by-class").append("line").attr("x1",ageScale(ageExtent[0])).attr("x2",ageScale(ageExtent[1]))
+                                            .attr("y1",classScale("first")).attr("y2",classScale("first")).attr("class","dashed");
+        d3.select("#by-class").append("line").attr("x1",ageScale(ageExtent[0])).attr("x2",ageScale(ageExtent[1]))
+                                         .attr("y1",classScale("second")).attr("y2",classScale("second")).attr("class","dashed");
+        d3.select("#by-class").append("line").attr("x1",ageScale(ageExtent[0])).attr("x2",ageScale(ageExtent[1]))
+                                  .attr("y1",classScale("third")).attr("y2",classScale("third")).attr("class","dashed");
+        d3.select("#by-class").append("text").text("first").attr("class","axis").attr("x",45).attr("y",classScale("first"));
+        d3.select("#by-class").append("text").text("second").attr("class","axis").attr("x",45).attr("y",classScale("second"));
+        d3.select("#by-class").append("text").text("third").attr("class","axis").attr("x",45).attr("y",classScale("third"));
+  
+        // Axes to show age
+        var ageAxis = d3.axisBottom(ageScale);
+        d3.select("#all-passengers").append("g").attr("transform","translate(0,170)").call(ageAxis);
+        d3.select("#by-class").append("g").attr("transform","translate(0,370)").call(ageAxis);
+  
+        // Layers for drawing
+        let allLayer = d3.select("#all-passengers").append("g");
+        let allWidth = d3.select("#all-passengers").attr("width");
+        let allHeight = d3.select("#all-passengers").attr("height");
+        let classLayer = d3.select("#by-class").append("g");
+        let classWidth = d3.select("#by-class").attr("width");
+        let classHeight = d3.select("#by-class").attr("height");
+  
+  
+        // --- Notes from class ---
+        
+        // passengers = passengers.slice(0,200);
+        console.log(passengers);
+        
+        passengers.forEach( d => {
+          d.x = d3.randomUniform(10,allWidth-10)();
+          d.y = d3.randomUniform(10,allHeight-10)();
+        });
+        
+        
+        let circles = allLayer.selectAll("circle").data(passengers)
+                              .join("circle")
+                              .attr("r", 2)
+                              .attr("cx", d => d.x )
+                              .attr("cy", d => d.y )
+                              .attr("fill", d => mortalityScale(d.mortality) );
+        
+        var passengerSimulation = d3.forceSimulation()
+                                    .nodes(passengers)
+                                    .force("ypos", d3.forceY()
+                                                     .strength( 0.05 )
+                                                     .y( allHeight/2.0 ) )
+                                    .force("xpos", d3.forceX()
+                                                     .strength( 0.05 )
+                                                     .x(  d => ageScale(d.age) ) )
+                                    .force("collision", d3.forceCollide()
+                                                          .radius(2.5)
+                                                          .iterations(2) )
+                                    .on("tick", updateAllPassengerPositions);
+        
+        passengerSimulation.stop()
+        
+        function updateAllPassengerPositions() {
+            circles.attr("cx", d => d.x).attr("cy", d => d.y);
+        }
+        
+        
+        
+  
+  
+        // Handle the buttons provided in the HTML
+        d3.select("#play").on("click", () => {
+          // Start animating the simulation
+          passengerSimulation.restart(); // clears the "alpha" value and starts fresh
+  
+        });
+        d3.select("#stop").on("click", () => {
+          // Pause the simulation animation
+            passengerSimulation.stop(); // pauses sim
+  
+        });
+        d3.select("#tick").on("click", () => {
+          // Move the simulation one "tick"
+            passengerSimulation.tick(); // moves one frame forward, but doesn't trigger tick event
+            updateAllPassengerPositions(); // manually update circles
+  
+        });
+        d3.select("#rand").on("click", () => {
+          // Randomize positions and restart the simulation
+            passengerSimulation.restart(); 
+            passengerSimulation.stop(); // then stop sim so we can reposition without issue
+            passengerSimulation.alpha(1); // "reheat" the simulation -- more on this later
+            passengers.forEach( d => {
+              d.x = d3.randomUniform(10,allWidth-10)();
+              d.y = d3.randomUniform(10,allHeight-10)();
+            });
+            updateAllPassengerPositions(); // manually update appearance
+  
+        });
+  
+  
+  
+  
+  
+        // Let's run the class version before rendering it
+        //   Data file is passengers_by_class -- need to use a fresh file because forceSimulation mutates data
+        // As noted in class, it would be better to do this as an asynchronous block
+        //  SEE COMMENTED CODE AT BOTTOM FOR EXAMPLE OF ASYNC CODE
+        //
+        // Initialize a force model for passengers
+        let classSimulation = d3.forceSimulation()
+                                .nodes(passengers_by_class)
+                              // force to prevent points from overlapping
+                               .force("collision", d3.forceCollide()
+                                                     .radius(2)
+                                                     .iterations(3) )
+                              // "magnetic" pull on x axis
+                              .force("xpos", d3.forceX()
+                                               .x( d => ageScale(d.age) )
+                                               .strength( 0.3 ) )
+                              // "magnetic" pull on y axis
+                              .force("ypos", d3.forceY()
+                                               .y( d => classScale(d.class) )
+                                               .strength( 0.3 ) )
+                              .stop();
+  
+        // Run the simulation without showing it -- we will make use of alpha here, but in long run might be better to use alphaMin and alphaDecay
+        //  Example of more advanced version of this code: https://bl.ocks.org/mbostock/1667139
+  
+        while (classSimulation.alpha() > 0.01) {  // Note: > 0 lead to an infinite loop because alpha() can _approach_ 0 but not reach it
+  
+          classSimulation.tick(); // Step simulation, but don't update any visual elements
+  
+        }
+  
+        // When complete, draw the points
+        classLayer.selectAll("circle").data(passengers_by_class)
+                .enter().append("circle")
+                .attr("r", 1.5) // we reduced this compared to d3.forceCollide so that points appear more spaced out
+                .attr("cx", d => d.x) // initially set random positions here, but the simulation doesn't use cx and cy from circles
+                .attr("cy", d => d.y) //  so we had to instead add the forEach above and use the x and y positions
+                .attr("fill", d => mortalityScale(d.mortality));
+  
+        
+        // *** One good strategy for pre-computation is to save your results as a dataset ***
+        // Then you can just import the new JSON file with the positions already "baked" in
+        // (just be careful to remove extra things like vx and vy to save space)
+        // 
+        // console.log(JSON.stringify(passengers_by_class)) // copy this from console
+        //                                                  //  into a new .json file!
+  
+  
+  
+        // // THIS VERSION RUNS ASYNC AND WON'T FREEZE PAGE LOAD
+        // // NOTE: THIS DOES NOT SIGNAL TO THE USER THAT THEY SHOULD WAIT -- ADD A LOADING ANIMATION OR OTHER SIGN
+        // setTimeout(function() {
+        //   // Initialize a force model for passengers
+        //   let classSimulation = d3.forceSimulation()
+        //                           .nodes(passengers_by_class)
+        //                         // force to prevent points from overlapping
+        //                          .force("collision", d3.forceCollide()
+        //                                                .radius(2)
+        //                                                .iterations(3) )
+        //                         // "magnetic" pull on x axis
+        //                         .force("xpos", d3.forceX()
+        //                                          .x( d => ageScale(d.age) )
+        //                                          .strength( 0.3 ) )
+        //                         // "magnetic" pull on y axis
+        //                         .force("ypos", d3.forceY()
+        //                                          .y( d => classScale(d.class) )
+        //                                          .strength( 0.3 ) )
+        //                         .stop();
+        //
+        //   // Run the simulation without showing it
+        //
+        //   // NOTE: to give the simulation longer to settle since we aren't freezing page load, let's halve the decay
+        //   classSimulation.alphaDecay( classSimulation.alphaDecay() / 2.0 );
+        //
+        //   while (classSimulation.alpha() > 0.01) {  // Note: > 0 lead to an infinite loop because alpha() can _approach_ 0 but not reach it
+        //
+        //     classSimulation.tick(); // Step simulation, but don't update any visual elements
+        //
+        //   }
+        //
+        //   // When complete, draw the points
+        //   classLayer.selectAll("circle").data(passengers_by_class)
+        //           .enter().append("circle")
+        //           .attr("r", 1.5) // we reduced this compared to d3.forceCollide so that points appear more spaced out
+        //           .attr("cx", d => d.x) // initially set random positions here, but the simulation doesn't use cx and cy from circles
+        //           .attr("cy", d => d.y) //  so we had to instead add the forEach above and use the x and y positions
+        //           .attr("fill", d => mortalityScale(d.mortality));
+        // });
+  
+  
+      };
+  
+      requestData();
+  
+  
       
-
-      // BONUS: Before setting its phyllotaxis arrangement, forceSimulation will check to see if you've already assigned d.x and d.y
-      // Here we can put points in random places so they don't appear off screen
-      // d3 won't overwrite these when you make the forceSimulation, and will just start using them when the sim begins
-      passengers.forEach( d => {
-        d.x = d3.randomUniform(10,allWidth-10)();
-        d.y = d3.randomUniform(10,allHeight-10)();
-      });
-      
-      // Moved making circles back up here due to BONUS code
-      let circles = allLayer.selectAll("circle").data(passengers)
-                            .join("circle")
-                            .attr("r", 2)
-                            .attr("cx", d => d.x )
-                            .attr("cy", d => d.y )
-                            .attr("fill", d => mortalityScale(d.mortality) );
-      
-      // Simulation of physics for bubble plot
-      //  Forces: attract vertically to midpoint, attract horizontally to correct age, points collide / resist overlaps
-      var passengerSimulation = d3.forceSimulation()
-                                      // .nodes(arrayOfObjects)
-                                  .nodes(passengers)
-                                      // .force(name, forceObject)
-                                  // "magnetic" pull on y axis
-                                  .force("ypos", d3.forceY()
-                                                   .strength( 0.05 )
-                                                   .y( allHeight/2.0 ) )
-                                  // "magnetic" pull on x axis
-                                  .force("xpos", d3.forceX()
-                                                   .strength( 0.05 )
-                                                   .x(  d => ageScale(d.age) ) )
-                                  // force to prevent points from overlapping
-                                  .force("collision", d3.forceCollide()
-                                                        .radius(2.5) // trick to add gaps
-                                                        .iterations(2) )
-                                  .on("tick", updateAllPassengerPositions);
-                                  // Called each "tick" of the simulation, like a frame of animation
-                                  // Your job is to update the appearance to match the simulation
-      
-      // Tick function to keep SVG in sync with simulation running asynchronously
-      function updateAllPassengerPositions() {
-          circles.attr("cx", d => d.x).attr("cy", d => d.y);
-      }
-
-      // Handle the buttons provided in the HTML
-      d3.select("#play").on("click", () => {
-        // Start animating the simulation
-        passengerSimulation.restart(); // clears the "alpha" value and starts fresh
-
-      });
-      d3.select("#stop").on("click", () => {
-        // Pause the simulation animation
-          passengerSimulation.stop(); // pauses sim
-
-      });
-      d3.select("#tick").on("click", () => {
-        // Move the simulation one "tick"
-          passengerSimulation.tick(); // moves one frame forward, but doesn't trigger tick event
-          updateAllPassengerPositions(); // manually update circles
-
-      });
-      d3.select("#rand").on("click", () => {
-        // Randomize positions and restart the simulation
-          passengerSimulation.restart(); 
-          passengerSimulation.stop(); // then stop sim so we can reposition without issue
-          passengerSimulation.alpha(1); // "reheat" the simulation -- more on this later
-          passengers.forEach( d => {
-            d.x = d3.randomUniform(10,allWidth-10)();
-            d.y = d3.randomUniform(10,allHeight-10)();
-          });
-          updateAllPassengerPositions(); // manually update appearance
-
-      });
-
-
-      // NOW SPLIT BY CABIN CLASS
-      // Let's run the class version before rendering it
-      //   Data file is passengers_by_class -- need to use a fresh file because forceSimulation mutates data
-      
-      // Initialize a force model for passengers
-      let classSimulation = d3.forceSimulation()
-                              .nodes(passengers_by_class)
-                            // force to prevent points from overlapping
-                             .force("collision", d3.forceCollide()
-                                                   .radius(2)
-                                                   .iterations(3) )
-                            // "magnetic" pull on x axis
-                            .force("xpos", d3.forceX()
-                                             .x( d => ageScale(d.age) )
-                                             .strength( 0.3 ) )
-                            // "magnetic" pull on y axis
-                            .force("ypos", d3.forceY()
-                                             .y( d => classScale(d.class) )
-                                             .strength( 0.3 ) )
-                            .stop();
-
-      // ** How can we run the simulation "behind the scenes" and just show the results?
-      // To do so, we need to learn how simulations "solve" the physics over time
-
-      // TBD in class
-
-
-
-      // When complete, draw the points in their final location
-      classLayer.selectAll("circle").data(passengers_by_class)
-              .enter().append("circle")
-              .attr("r", 1.5)
-              .attr("cx", d => d.x)
-              .attr("cy", d => d.y)
-              .attr("fill", d => mortalityScale(d.mortality));
-
-      
-      
-
-
-
-
-      
-
-    };
-
-    requestData();
-
-
+      </script>
+  
+  
+    <!--- calls the highlight library to fill the <pre> tag with code --->
+    <script>
     
+    function sanitize(s) {
+      return s.replace("<br>", "\\n")
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+            }
+      document.getElementById("display1").innerHTML = sanitize( document.getElementById("notes1").innerText);
+      hljs.highlightAll();
     </script>
-
-
-  <!--- calls the highlight library to fill the <pre> tag with code --->
-  <script>
   
-  function sanitize(s) {
-    return s.replace("<br>", "\\n")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-          }
-    document.getElementById("display1").innerHTML = sanitize( document.getElementById("notes1").innerText);
-    hljs.highlightAll();
-  </script>
-
-
-  </div>
-</body>
-</html>
+  
+    </div>
+  </body>
+  </html>
+  
