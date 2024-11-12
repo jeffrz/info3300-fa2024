@@ -1,117 +1,110 @@
 <html><head>
-<title>INFO 3300 - November 4 - November 11</title>
-
-  <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
+  <title>INFO 3300 - November 4 - November 11</title>
   
-  <link rel="stylesheet" type="text/css" href="../css/normalize.css">
-  <link rel="stylesheet" type="text/css" href="../css/skeleton.css">
-  <link rel="stylesheet" type="text/css" href="../css/custom-style.css">
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
-  <link rel="stylesheet" href="../css/hljs-base16.css">
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
+    
+    <link rel="stylesheet" type="text/css" href="../css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="../css/skeleton.css">
+    <link rel="stylesheet" type="text/css" href="../css/custom-style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+    <link rel="stylesheet" href="../css/hljs-base16.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+    
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/validator@13.5.2/validator.min.js"></script>
+    
+    <style>
   
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="https://d3js.org/topojson.v3.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/validator@13.5.2/validator.min.js"></script>
+    .outline {
+      stroke: gainsboro;
+      stroke-width: 1px;
+      fill: none;
+    }
   
-  <style>
-
-  .outline {
-    stroke: gainsboro;
-    stroke-width: 1px;
-    fill: none;
-  }
-
-  circle {
-    fill: darkgrey;
-    stroke-width: 1px;
-  }
-
-  .area {
-    stroke: royalblue;
-    fill: skyblue;
-    stroke-width: 2px;
-  }
-
-  #panel {
-    width: 930px;
-  }
-
-  #map {
-    width: 600px;
-    height: 500px;
-    float: left;
-  }
-  #controls {
-    width:300px;
-    height:500px;
-    float:right;
-  }
-  #controls input {
-    width:200px;
-    margin-left:5px;
-  }
+    circle {
+      fill: darkgrey;
+      stroke-width: 1px;
+    }
   
-  .datapoint {
-      opacity: 0.5;
-      fill: black;
-  }
-  .starred {
-    fill: red;
-    opacity: 1;
-  }
+    .area {
+      stroke: royalblue;
+      fill: skyblue;
+      stroke-width: 2px;
+    }
   
-  #errormsg {
-    color: darkred;
-  }
-  button[disabled] {
-    color: lightgrey;
-  }
-
-  </style>
-
-</head>
-<body>
-  <div class="container larger">
-  <h3>Notes for November 4 - November 11</h3>
+    #panel {
+      width: 930px;
+    }
   
-  <h5> ATTN: THIS PAGE USES A SIMPLE PYTHON FLASK SERVER TO SERVE ITS DATA </h5>
+    #map {
+      width: 600px;
+      height: 500px;
+      float: left;
+    }
+    #controls {
+      width:300px;
+      height:500px;
+      float:right;
+    }
+    #controls input {
+      width:200px;
+      margin-left:5px;
+    }
+    
+    .datapoint {
+        opacity: 0.5;
+        fill: black;
+    }
+    .starred {
+      fill: red;
+      opacity: 1;
+    }
   
-  <p> Make sure to run the flask web server (e.g. "python3 serv.py") in order to play with this code. Using the old SimpleHTTPServer will not work here. If you get a "flask module not found" error, then you may need to install it using "pip install flask". </p> 
-  <p> You can find installation instructions on <a href="https://flask.palletsprojects.com/en/2.3.x/">Flask's documentation</a>. Here is a <a href="https://flask.palletsprojects.com/en/2.3.x/quickstart/">quick start guide</a> for creating a project. Flask is certainly not the only way to provide the kinds of client/server communications we are exploring in class. It's just a lightweight one that has a lot of nuts and bolts exposed. Real production environments are more likely to use a stack of back- and front-end tools such as <a href="https://reactjs.org/">React</a>, <a href="https://www.djangoproject.com/">Django</a>, and its <a href="https://www.django-rest-framework.org/">RESTful framework</a>.</p>
+    </style>
   
-  <p> Check out the original paper on <a href="http://www.cs.umd.edu/hcil/trs/92-01/92-01.html">Dynamic HomeFinder</a>. A <a href="https://youtu.be/5X8XY9430fM">1993 video</a> shows its dynamic queries in action. </p>
+  </head>
+  <body>
+    <div class="container larger">
+    <h3>Notes for November 4 - November 11</h3>
+    
+    <h5> ATTN: THIS PAGE USES A SIMPLE PYTHON FLASK SERVER TO SERVE ITS DATA </h5>
+    
+    <p> Make sure to run the flask web server (e.g. "python3 serv.py") in order to play with this code. Using the old SimpleHTTPServer will not work here. If you get a "flask module not found" error, then you may need to install it using "pip install flask". </p> 
+    <p> You can find installation instructions on <a href="https://flask.palletsprojects.com/en/2.3.x/">Flask's documentation</a>. Here is a <a href="https://flask.palletsprojects.com/en/2.3.x/quickstart/">quick start guide</a> for creating a project. Flask is certainly not the only way to provide the kinds of client/server communications we are exploring in class. It's just a lightweight one that has a lot of nuts and bolts exposed. Real production environments are more likely to use a stack of back- and front-end tools such as <a href="https://reactjs.org/">React</a>, <a href="https://www.djangoproject.com/">Django</a>, and its <a href="https://www.django-rest-framework.org/">RESTful framework</a>.</p>
+    
+    <p> Check out the original paper on <a href="http://www.cs.umd.edu/hcil/trs/92-01/92-01.html">Dynamic HomeFinder</a>. A <a href="https://youtu.be/5X8XY9430fM">1993 video</a> shows its dynamic queries in action. </p>
+    
+    <p> If you want to play with Dynamic Homefinder, you can download a version for MSDOS <a href="http://hcil.umd.edu/products/">here</a>. Use DOS simulator like DOSBox or Boxer to run it. </p>
+    
+    <p> (Finally, note that this client/server setup intentionally disregards some best practices. It's not making the best use of back- and front-end capabilities, wastes bandwidth, and might break in high latency situations -- all of which you should do better in a real-world app.)</p>
+    
+    <p> Here is some <a href="https://github.com/d3/d3-brush">documentation</a> on d3-brush, which we use in a later lecture for our direct filter interactions. </p>
+    
+    <h5>HTML for today:</h5>
   
-  <p> If you want to play with Dynamic Homefinder, you can download a version for MSDOS <a href="http://hcil.umd.edu/products/">here</a>. Use DOS simulator like DOSBox or Boxer to run it. </p>
-  
-  <p> (Finally, note that this client/server setup intentionally disregards some best practices. It's not making the best use of back- and front-end capabilities, wastes bandwidth, and might break in high latency situations -- all of which you should do better in a real-world app.)</p>
-  
-  <p> Here is some <a href="https://github.com/d3/d3-brush">documentation</a> on d3-brush, which we use in a later lecture for our direct filter interactions. </p>
-  
-  <h5>HTML for today:</h5>
-
-  <div id="panel">
-    <div id="map">
-      <svg id="map_canvas" height="490" width="600" style="background: #fff;" ></svg>
+    <div id="panel">
+      <div id="map">
+        <svg id="map_canvas" height="490" width="600" style="background: #fff;" ></svg>
+      </div>
+      <div id="controls">
+      </div>
     </div>
-    <div id="controls">
-    </div>
-  </div>
+    
   
-
-
-  <!-- This block will be automatically filled with syntax-highlighted code from the script below -->
-  <div>
-    <h5>Code for today:</h5>
-  <pre>
-    <code id="display1" class="hljs javascript">
-    </code>
-  </pre>
-  </div>
-
-  <!--- Code for today's class --->
-  <script id="notes1">
-
+  
+    <!-- This block will be automatically filled with syntax-highlighted code from the script below -->
+    <div>
+      <h5>Code for today:</h5>
+    <pre>
+      <code id="display1" class="hljs javascript">
+      </code>
+    </pre>
+    </div>
+  
+    <!--- Code for today's class --->
+    <script id="notes1">
+  
     const requestData = async () => {
     
     // Data originally in GeoJSON form on the WPRDC (https://data.wprdc.org/dataset/neighborhoods1)
@@ -129,6 +122,55 @@
     map.append("path").datum(pghMesh).attr("class","outline").attr("d", path);
     
     
+    
+    
+    
+    // Let's make some dynamic querying tools
+    // We want to give more rapid response to users and enable more direct manipulation of interface elements
+    // To do so, we'll use d3.brush to make our own sliders
+    // We'll go further, showing the data distribution to the user underneath the slider
+    // This is going to require that we keep the whole dataset in RAM -- querying the server every time the user interacts is going to be cumbersome and intractible once latency gets involved
+    // (whenever you design systems like this, you'll face this kind of trade-off)
+    
+    // NOTE: this code was originally towards the bottom of the file -- as updateHouses needs to run pointPassesFilters,
+    //   it must be moved up here so that it has a filters dict to iterate through
+    // NOTE 2: The reason my original filter function demo kept failing is because d.SalePrice is not a valid key
+    
+    // First, a list of filters the user has applied
+    // The dict is going to map attribName => filter_function
+    //  - We use a dict so that we can change filters as the user adjusts them
+    //  - The filter_function is a clever way to set up the filters in real time...
+    //    the interactive elements will create a function that is True when a point
+    //    'passes' the filters
+    var filters = {};
+    
+    // EXAMPLE FILTER FUNCTION
+    // filters['price'] = function(d) {  return d['Sale Price'] < 400000 && d['Sale Price'] > 300000;  }
+    
+    // And a function for checking whether a point "passes through" the filters
+    // For a given point, we'll loop through each of the filter functions and apply them
+    // Each time we apply a filter, we use && to make sure a point passes ALL of the filters
+    function pointPassesFilters( point ) {
+    
+      // Start out with true so we can use && to 
+      let stillPassed = true;
+      
+      // Loop through the filters and check if it passes each
+      // Objects.values(filters) in this case is the list of filter functions
+      
+      Object.values(filters).forEach( filterFunc => {
+        
+        stillPassed = filterFunc(point) && stillPassed;
+        // Might want to short-circuit the loop if it fails and you have lots of filters
+        
+      });
+      
+      return stillPassed;
+      
+    }
+    
+    
+    
     // Load in house data from our backend server -- apply no filter criteria so we get everything
     // It is good practice to keep a "var" of these datasets around so that if new data come in during interactions they will be in an obvious place and you don't need to download them again
     var houses = await d3.json("/houses");
@@ -137,7 +179,10 @@
     // This makes life easier and reduces redundant copies of code which lead to bugs
     function updateHouses(data) {
       
-      console.log("updateHouses",data);
+      // Filter the points using the filter dictionary first
+      data = data.filter( d => pointPassesFilters(d) );
+      
+      // console.log("updateHouses",data);
       
       // Project the lat, lng data to pixels
       data.forEach( d => {
@@ -184,7 +229,7 @@
     // Like updateHouses, we wrap this in a function in case we need to star things often
     function updateStarred(data) {
       
-      console.log("updateStarred",data);
+      // console.log("updateStarred",data);
     
       // Select all circles and assign the class "starred" if their HouseID is in the starred list
       map.selectAll("circle")
@@ -196,145 +241,129 @@
     updateStarred(starred);
     
     
-    // Let's add some static query tools to let the user filter their data
-    // These will take the form of text input fields and a button to apply the filter
+    // Let's add some dynamic query tools to let the user filter their data
+    
+    
+    // Make the interactive sliders
+    
+    // A function to make a slider element and wire it up
+    function makeSlider( container, label, attribute, sliderWidth, sliderHeight ) {
+      
+      // Get a raw array of values for this property
+      let values = houses.map(d => d[attribute]);
+      
+      // Find min and max for some scales
+      let minMax = d3.extent(values);
+      let xScale = d3.scaleLinear().domain( minMax )
+                                  .range([10,sliderWidth-10]); // padding here for ease
+      let xAxis = d3.axisBottom(xScale).tickFormat(d3.format(".2s"));
+  
+  
+      // Create some HTML elements
+      let wrapper = container.append("div").attr("class", "control");
+      wrapper.append("div").text(label);
+      let canvas = wrapper.append("svg").attr("width",sliderWidth)
+                                        .attr("height",sliderHeight+20)
+                                        .attr("attribute",attribute);
+      canvas.append("g").attr("transform",`translate(0,${sliderHeight})`)
+                        .call(xAxis);
+                        
+                        
+      // Make an area chart
+      let areaLayer = canvas.append("g");
+      
+      // Built-in d3 helper function to count up data
+      let numBins = 10;
+      // Program a histogram generator to count up data into "bins"
+      let histoGen = d3.histogram().domain( minMax )
+                                   .thresholds( numBins );
+      let counts = histoGen(values);
+      console.log(counts);
+      // Notice that counts is an array of arrays, but each of the elements
+      //  actually has some bonus properties, x0 and x1 along with length
+      // These are actually what you use to draw the histogram
+                                 
+      // To make the line chart smoother, we add a dummy Object at the start of the array using unshift
+      // Our fake datapoint just mimics the original first point to fill the space
+      // (If you used x0 to draw the area, then you'd have to add the dummy Object at the end)
+      counts.unshift({ x0: 0,
+                       x1: counts[0].x0,
+                       length: counts[0].length });
+  
+      let yScale = d3.scaleLinear().domain( d3.extent(counts, d=>d.length) )
+                                   .range([sliderHeight, 4]); 
+  
+      // Area generator is like a lineGen, but we give y0 and y1 to fill it in
+      let area = d3.area().x(d => xScale(d.x1))
+        .y0(yScale(0))
+        .y1(d => yScale(d.length))
+        .curve(d3.curveNatural);
+        
+      // Adding the path works just like a line (the area generator just makes a filled region)
+      areaLayer.append("path").datum(counts)
+        .attr("class", "area")
+        .attr("d", area);
+        
+      
+    
+      // Create the filter_function for this particular slider
+      // BY DEFAULT, it just always returns true because any point passes through the filter
+      let filterFunc = d => true;
+      // Add it to the dict so we can overwrite it later
+      filters[attribute] = filterFunc;
+  
+      
+      // Allow the user to select regions of the slider
+      var brush = d3.brushX().extent([[10,0],                           // Upper left corner
+                                      [sliderWidth-10, sliderHeight]])  // Lower right corner
+                             .on("brush end", brushMoved);
+      // NOTE: we still need to *call the brush* towards the end of our code to "paste" it into HTML
+      
+      function brushMoved( event ) {
+          
+        console.log(event.type, event.selection);
+        
+        // Everything but clicking on brush area
+        if (event.selection !== null) {
+          
+          // Run scales in reverse to get data values for the ends of the brush
+          //  If a scale turns data -> pixels, then scale.invert turns pixels -> data
+          let start = xScale.invert( event.selection[0] );
+          let end = xScale.invert( event.selection[1] );
+          
+          // Overwrite old filter in our dictionary
+          // This filter now only returns True if the point's value is between start and end
+          let filterFunc = d => d[attribute] >= start && d[attribute] <= end;
+          filters[attribute] = filterFunc;
+          
+          updateHouses(houses);
+          updateStarred(starred);
+        }
+        // Clicking on brush area to empty it out
+        else {
+            // Selected nothing, let everything pass
+            let filterFunc = d => true;
+            filters[attribute] = filterFunc;
+            
+            updateHouses(houses);
+            updateStarred(starred);
+        }
+        
+      
+      }   
+               
+      // Call the brush to add it to the slider - do this at the end so that it covers the area chart
+      canvas.append("g").attr("class","brush").call(brush);
+      
+    }
+    
+    // Make the sliders
     let controls = d3.select("#controls");
     
-    // Sale price
-    let price = controls.append("div") // Container
-    price.append("p").text("Min Price:") // Label
-         .append("input")              // Input element
-         .attr("type","text")  
-         .attr("class","price")
-         .attr("param","priceMn");
-         // We use the "param" attribute to store where this value would go in the URL
-    price.append("p").text("Max Price:")
-         .append("input")        
-         .attr("type","text")  
-         .attr("class","price")
-         .attr("param","priceMx");
-         
-    // Bedrooms
-    let bed = controls.append("div")
-    bed.append("p").text("Min Beds:")
-        .append("input")        
-        .attr("type","text")  
-        .attr("class","bed")
-        .attr("param","bedMn");
-    bed.append("p").text("Max Beds:")
-        .append("input")        
-        .attr("type","text")
-        .attr("class","bed")
-        .attr("param","bedMx"); 
-        
-    // Bathrooms
-    let bath = controls.append("div")
-    bath.append("p").text("Min Baths:")
-        .append("input")        
-        .attr("type","text")
-        .attr("class","bath")
-        .attr("param","bathMn");
-    bath.append("p").text("Max Baths:")
-        .append("input")        
-        .attr("type","text")
-        .attr("class","bath")
-        .attr("param","bathMx");   
-    
-    // Placeholder for error message    
-    let error = controls.append("div")
-                        .attr("id","errormsg")
-    
-                        
-    // Button to submit
-    // You could imagine doing this all on the client's side (and it would be more efficient)
-    // Here we send the request to the server so that we can see what's happening
-    // In cases where the server has vastly more data than can be transmitted, this pattern is more useful
-    let button = controls.append("div")
-            .append("button")
-            .text("Update")
-            .on("click", function() {
-              // create a URL target for us to add parameters to
-              let target = new URL("/houses", document.location);
-              
-              // look at what the user has entered, adding parameters as necessary
-              controls.selectAll("input").each( function() {
-                
-                let key = d3.select(this).attr("param");
-                let txt = d3.select(this).property("value");
-                
-                if (txt.length > 0) {
-                  
-                  //add that criterion to the search
-                  target.searchParams.append(key, txt);
-                  
-                }
-                
-              });
-              
-              console.log(target);
-              
-              // send the filter criteria to the server and update based on its response
-              d3.json( target ).then( (data) => {
-                
-                houses = data;
-                updateHouses(data);
-                updateStarred(data);
-                
-              });
-              
-              
-              
-            });
-    
-    
-    // BONUS: Add some input validation by checking the boxes as a person types
-    // This makes use of a library that has been added to the HEAD of the document!
-    controls.selectAll("input").on("input", validate);
-    //  The "change" event for text just triggers when you click off -- we want realtime feedback
-    function validate() {   
-    
-      // First enable the button and empty the text msg
-      error.text("");
-      button.property("disabled","");
-    
-      // Go through each input
-      controls.selectAll("input").each( function() {
-    
-        let txt = d3.select(this).property("value");
-        if (txt.length < 1) {
-          return;
-        }
-    
-        // We'll use switch as shorthand for a series of it/else statements
-        // Switch always uses the === comparator
-        switch ( d3.select(this).attr("class") ) {
-          case "price":
-            if (!validator.isCurrency(txt)) {
-              error.text("Please include a valid currency value for price.")
-              button.property("disabled","true");
-            }
-            // NOTE: While we validate for currency, this still breaks the server
-            //       We would need to add code to serv.py to handle the $ and , keys that validator allows
-            break;
-          case "bed":
-            if (!validator.isInt(txt)) {
-              error.text("Please include a valid whole number for beds.")
-              button.property("disabled","true");
-            }
-            break;
-          case "bath":
-            if (!validator.isFloat(txt)) {
-              error.text("Please include a valid decimal number for baths.")
-              button.property("disabled","true");
-            }
-            break;
-        }
-    
-      })
-    
-    } 
-    
-    
+    makeSlider( controls, "Sale Price: ", "Sale Price", 280, 30 );
+    makeSlider( controls, "Bedrooms: ", "Bedrooms", 280, 30 );
+    makeSlider( controls, "Bathrooms: ", "Bathrooms", 280, 30 );
+    makeSlider( controls, "Lot Size: ", "Lot Size", 280, 30 );     // serv.py sends this too
     
   
     };
@@ -345,27 +374,28 @@
   
   
     </script>
-
-
   
-
-  <!--- calls the highlight library to fill the <pre> tag with code --->
-  <script>
-
-  function sanitize(s) {
-    return s.replace("<br>", "\\n")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-          }
-    document.getElementById("display1").innerHTML = sanitize( document.getElementById("notes1").innerText);
-    hljs.highlightAll();
-  </script>
-
-
-
-  </div>
-</body>
-</html>
+  
+    
+  
+    <!--- calls the highlight library to fill the <pre> tag with code --->
+    <script>
+  
+    function sanitize(s) {
+      return s.replace("<br>", "\\n")
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+            }
+      document.getElementById("display1").innerHTML = sanitize( document.getElementById("notes1").innerText);
+      hljs.highlightAll();
+    </script>
+  
+  
+  
+    </div>
+  </body>
+  </html>
+  
