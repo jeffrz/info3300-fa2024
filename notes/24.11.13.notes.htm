@@ -1,89 +1,169 @@
 <html><head>
-<title>INFO 3300 - November 13</title>
+  <title>INFO 3300 - November 13</title>
+  
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
+    
+    <link rel="stylesheet" type="text/css" href="../css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="../css/skeleton.css">
+    <link rel="stylesheet" type="text/css" href="../css/custom-style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+    <link rel="stylesheet" href="../css/hljs-base16.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+    
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+    <style>
+    </style>
+  
+  </head>
+  <body>
+    <div class="container larger">
+    <h3>Notes for November 13</h3>
+    <p>
+      Today we will work with multitouch displays and learn some patterns for how they differ from mouse interactions. Keep in mind that in default form the touch display will mimic a mouse, and sometimes even send events that simulate a mouse wheel if you pinch. You only need to explicitly accommodate touch if you want to handle multiple touches or you hit an edge case where that simulation falls short.
+    </p>
+    <p>
+      This lecture is going to walk through one d3 example case taken from the d3 docs. Check them out <a href="https://observablehq.com/@d3/multitouch">here</a> and <a href="https://observablehq.com/@fil/pointer-events">here</a>.
+    </p>
+    <p>
+      If you want to learn a bit more about gestural interactions, <a href="http://depts.washington.edu/acelab/proj/dollar/index.html">$1 gesture recognizers</a> are a decent way to start.
+    </p>
+    
+    
+    
+    <h5>HTML for today:</h5>
+    
+    <h5>Multitouch sketch:</h5>
+    <canvas id="plot" width="700" height="700" style="margin-bottom:20px" >
+    </canvas>
+  
+  
+    <!-- This block will be automatically filled with syntax-highlighted code from the script below -->
+    <h5>Code for today:</h5>
+    <pre>
+      <code id="display1" class="hljs javascript">
+      </code>
+    </pre>
+  
+  
+    <!--- Code for today's class --->
+    <script id="notes1">
+    
+    // We will start with multitouch drawing on a canvas
+    //  See https://observablehq.com/@fil/pointer-events-svg for a very clever way to use GeoJSON to do this in SVG
+    
+    // We haven't seen much of canvas elements yet. We will cover these in a later lecture
+    // For now, just think of them as a simple drawing canvas where you paint pixels
+    //  rather than making <circle> and <line> elements -- for our purposes
+    //  painting pixels onto a screen will work better (see above for a SVG solution)
+    var canvas = d3.select('#plot') // Get canvas element
+    var context = canvas.node().getContext('2d'); // Get the drawing context (the "paintbrush")
+    let width = canvas.attr("width");
+    let height = canvas.attr("height");
+    context.fillStyle = '#ddd'; // Pick a fill color
+    context.fillRect(0, 0, width, height); // Use that color to paint in a rectangle with these dimensions
+    context.fillStyle = '#ddd';
+    
+      // Handle touch events for as many fingers as will fit on screen
+      // For these, we use pointer events. You also have access to touch events, which work slightly differently
+      // In general, the pointer event API is the better one to use for multitouch behavior
+      
+      // Start with a "touchmove" to prevent default scrolling and zooming events on phones
+      //  With this, the canvas will "lock out" other kinds of gestures when interacting
+      canvas.on("touchmove", function(event) {event.preventDefault(); }) // prevent scrolling if two fingers are down
+          // Next, do this just to note behavior
+          .on("pointerup", function(event) { console.log("pointerup",event) } )
+          // Finally, detect when a finger is placed down
+          // Here we will set up some specific gesture handlers to deal with the finger that was just placed
+          .on("pointerdown", function(event) {
+            console.log("pointerdown", event);
+            
+            // Every time a new pointer is put down, we need to set the canvas up to track that individual finger -- while you can make some fancy logic to do this all in one event, it's much easier to set up per-finger listeners when the finger is placed on the canvas.
+            
+            let id = event.pointerId;  // Get the finger's ID assigned by the device/browser 
+            let targetNode = event.target;  // Another way to get "this" with pointers
+            
+            let prevPoint = null; // We are going to draw by marking the previous place the person moved...
+            let point = d3.pointer(event, targetNode); // ...and painting a line from there to the new location
+            //  d3.pointer will handle all of the math to figure out the right [x,y] position within targetNode
+            
+            //let color = d3.hsl(360 * Math.random(), 0.8, 0.7).hex() // each finger will get assigned a random color
+            
+            // BONUS: Here's a fun way to pick a random color from a d3 nominal color scheme
+            //   (in this case, we're using schemePaired but schemeCategory10 also works)
+            let color = d3.schemePaired[Math.floor(d3.schemePaired.length * Math.random())];
+            
+            // First step to set up the finger's gesture handlers:
+            // Designate the canvas to consume all touch events from here on for this finger (even if they move beyond the canvas bounds)
+            targetNode.setPointerCapture(id);
+            
+            // Second step: Make specfic events for this finger/touch
+            //  a) Handle when the finger lifts up or "disappears" and the device can't find it again
+            //     We do this by customizing the pointerup and pointercancel events with the finger ID
+            //     So pointerup becomes pointerup.5 if we want to respond ONLY to finger #5
+            //     You can bind multiple events to the same function using a space
+            canvas.on(`pointerup.${id} pointercancel.${id}`, function(evt) {
+              
+                    if (evt.pointerId !== id) return;  // check in case we didn't get the correct pointer event
+                    
+                    // clear out the events we added for this pointer
+                    d3.select(targetNode).on(`.${id}`, null); // "any event for fingers with this ID"
+                    
+                    // release the canvas pointer capture so that the finger ID can do other things again
+                    targetNode.releasePointerCapture(id);
+                  
+                  })
+            // b) Handle when the finger moves on a canvas, signalling we want to paint some color
+                  .on(`pointermove.${id}`, function(evt) {
+                    
+                    if (evt.pointerId !== id) return;  // check in case we didn't get the correct pointer event
+                    
+                    prevPoint = point;  // move the last pointer location to prevPoint
+                    point = d3.pointer(evt, targetNode); // then get a new pointer location
+                    
+                    // assuming we had a previous point and it wasn't null...
+                    // then paint a line from prevPoint to point in that finger's color
+                    if (prevPoint) {
+                      context.beginPath();  // begin a paint stroke
+                      context.strokeStyle = color; // set the finger's color (stored with the function when made)
+                      context.moveTo(prevPoint[0], prevPoint[1]); // move the paintbrush to prevPoint
+                      context.lineTo(point[0], point[1]);  // then make a line of paint to point
+                      context.stroke(); // ...and finally paint the stroke using the details provided
 
-  <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
+                      // Interesting bonus note: because JS isn't fully asynchronous, you shouldn't run into the end case where beginPath() starts executing and another thread's beginPath() also tries to execute on the same canvas. There are no threads. Instead, each event is handled piecewise by the scheduler, so paths are guaranteed to begin and end in series
+                    }
+                  });
+            
+          });
+                 
+            
+            
+            
+          
+    
   
-  <link rel="stylesheet" type="text/css" href="../css/normalize.css">
-  <link rel="stylesheet" type="text/css" href="../css/skeleton.css">
-  <link rel="stylesheet" type="text/css" href="../css/custom-style.css">
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
-  <link rel="stylesheet" href="../css/hljs-base16.css">
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+    </script>
+    
+    
+    
   
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="https://d3js.org/topojson.v3.min.js"></script>
-  <style>
-  </style>
-
-</head>
-<body>
-  <div class="container larger">
-  <h3>Notes for November 13</h3>
-  <p>
-    Today we will work with multitouch displays and learn some patterns for how they differ from mouse interactions. Keep in mind that in default form the touch display will mimic a mouse, and sometimes even send events that simulate a mouse wheel if you pinch. You only need to explicitly accommodate touch if you want to handle multiple touches or you hit an edge case where that simulation falls short.
-  </p>
-  <p>
-    This lecture is going to walk through one d3 example case taken from the d3 docs. Check them out <a href="https://observablehq.com/@d3/multitouch">here</a> and <a href="https://observablehq.com/@fil/pointer-events">here</a>.
-  </p>
-  <p>
-    If you want to learn a bit more about gestural interactions, <a href="http://depts.washington.edu/acelab/proj/dollar/index.html">$1 gesture recognizers</a> are a decent way to start.
-  </p>
-  
-  
-  
-  <h5>HTML for today:</h5>
-  
-  <h5>Multitouch sketch:</h5>
-  <canvas id="plot" width="700" height="700" style="margin-bottom:20px" >
-  </canvas>
-
-
-  <!-- This block will be automatically filled with syntax-highlighted code from the script below -->
-  <h5>Code for today:</h5>
-  <pre>
-    <code id="display1" class="hljs javascript">
-    </code>
-  </pre>
-
-
-  <!--- Code for today's class --->
-  <script id="notes1">
-  
-  // We will start with multitouch drawing on a canvas
-  //  See https://observablehq.com/@fil/pointer-events-svg for a very clever way to use GeoJSON to do this in SVG
-  var canvas = d3.select('#plot')
-  var context = canvas.node().getContext('2d');
-  let width = canvas.attr("width");
-  let height = canvas.attr("height");
-  context.fillStyle = '#ddd';
-  context.fillRect(0, 0, width, height);
-  context.fillStyle = '#ddd';
-  context.lineWidth = 2;
-  context.lineCap = "round";
-
-  
-
-  </script>
+    <!--- calls the highlight library to fill the <pre> tag with code --->
+    <script>
+    
+    function sanitize(s) {
+      return s.replace("<br>", "\\n")
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+            }
+      document.getElementById("display1").innerHTML = sanitize( document.getElementById("notes1").innerText);
+      hljs.highlightAll();
+    </script>
   
   
+    </div>
+  </body>
+  </html>
   
-
-  <!--- calls the highlight library to fill the <pre> tag with code --->
-  <script>
-  
-  function sanitize(s) {
-    return s.replace("<br>", "\\n")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-          }
-    document.getElementById("display1").innerHTML = sanitize( document.getElementById("notes1").innerText);
-    hljs.highlightAll();
-  </script>
-
-
-  </div>
-</body>
-</html>
