@@ -1,0 +1,208 @@
+<html><head>
+<title>INFO 3300 - November 18</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
+  
+  <link rel="stylesheet" type="text/css" href="../css/normalize.css">
+  <link rel="stylesheet" type="text/css" href="../css/skeleton.css">
+  <link rel="stylesheet" type="text/css" href="../css/custom-style.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+  <link rel="stylesheet" href="../css/hljs-base16.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+  
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  
+  <style>
+    
+  
+  </style>
+
+</head>
+<body>
+  <div class="container larger">
+    <h3>Notes for November 18</h3>
+    <p>Today we'll look at raster graphics and vector graphics. <a href="https://designshack.net/articles/layouts/vector-vs-raster-what-do-i-use/">Here</a> is a small guide.</p>
+    <p>Here is some documentation on <a href="https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API">canvas elements</a>. In a later lecture we make use of d3-Delaunay, which is documented <a href="https://github.com/d3/d3-delaunay">here</a>.</p>
+    <p>Here are a few articles talking about SVG versus Canvas and choosing between them: <a href="https://www.sitepoint.com/canvas-vs-svg-choosing-the-right-tool-for-the-job/">1</a>, <a href="https://smus.com/canvas-vs-svg-performance/">2 (older)</a> </p>
+    <p>In addition to Canvas and SVG, there is also WebGL which has a few extra capabilities which are very handy. You can make use of fragment shaders for visual effects (and even <a href="http://glslsandbox.com/e#207.3">GPU computation</a>).
+    <p>You can <a href="http://bl.ocks.org/mbostock/5914438">mix the raster and vector together</a> with enough work!</p>
+    <p>Also, there are lots of helper libraries, including <a href="https://github.com/quantmind/d3-canvas-transition">this one</a> which enables .transition() on Canvas.</p>
+    <h5>HTML for today:</h5>
+
+
+    <p> Canvas Chart </p>
+    
+    <div id="container" style="width: 800px; height: 500px;" >
+    </div>
+
+
+
+  <!-- This block will be automatically filled with syntax-highlighted code from the script below -->
+  <h5>Code for today:</h5>
+  <pre>
+    <code id="display1" class="hljs javascript">
+    </code>
+  </pre>
+
+
+  <script id="notes1">
+  
+  // UTILITY FUNCTIONS
+  // Here a slightly modified version of the sample function from underscore.js
+  // It is a very useful, MIT licensed JS utility library
+  // https://github.com/jashkenas/underscore
+  function sample(obj, n, guard) {
+    if (n == null || guard) {
+      if (!isArrayLike(obj)) obj = values(obj);
+      return obj[random(obj.length - 1)];
+    }
+    var sample = obj.slice();
+    var length = sample.length;
+    n = Math.max(Math.min(n, length), 0);
+    var last = length - 1;
+    for (var index = 0; index < n; index++) {
+      var rand = index + Math.floor(Math.random() * (last - index + 1))
+      var temp = sample[index];
+      sample[index] = sample[rand];
+      sample[rand] = temp;
+    }
+    return sample.slice(0, n);
+  }
+  
+
+  // BEGIN CLASS CODE
+  // Container that will hold the canvas and SVG overlay
+  const container = d3.select("#container").style("position","relative");
+  const width = Number(container.style("width").replace("px",""));
+  const height = Number(container.style("height").replace("px",""));
+  const margin = { top: 10, right: 10, bottom: 50, left:50};
+  const chartWidth = width - margin.left - margin.right;
+  const chartHeight = height - margin.top - margin.bottom;
+  
+  // Add a canvas element
+  const canvas = container.append("canvas")
+                          .attr("width",chartWidth)
+                          .attr("height",chartHeight)
+                          .style("position","absolute")
+                          .style("top",margin.top + 'px')
+                          .style("left",margin.left + 'px');
+  
+  // Layer SVG on top of the canvas so we can draw axes and make the canvas interactive
+  const svg = container.append("svg")
+                       .attr("width", width)
+                       .attr("height", height)
+                       .style("position","absolute")
+                       .style("top", 0)
+                       .style("left", 0);               
+  const yAxisArea = svg.append("g").attr("transform","translate("+(margin.left-2)+","+margin.top+")");
+  const xAxisArea = svg.append("g").attr("transform","translate("+margin.left+","+(chartHeight+2+margin.top)+")");
+  const label = svg.append("text").attr("x", margin.left+10).attr("y", margin.top+10);
+  
+  // Add our interactive area, which is just a transparent rect
+  // This will hold our mouseover highlights so we can do them without redrawing the whole canvas
+  const interactiveArea = svg.append("g").attr("transform","translate("+margin.left+","+margin.top+")");
+  interactiveArea.append("rect")
+                 .attr("width",chartWidth)
+                 .attr("height",chartHeight)
+                 .attr("x",0)
+                 .attr("y",0)
+                 .attr("opacity",0);         
+                
+                                   
+  const drawPlot = async () => {
+   
+    let data = await d3.csv("../datasets/board-games-simplified.csv");
+    console.log(data.length);
+
+    const parseTime = d3.timeParse("%Y");
+    data.forEach( (d, i) => {
+      d['year_published'] = parseTime(d['year_published']);
+      d['average_rating'] = Number(d['average_rating']);
+      d['playing_time'] = Number(d['playing_time']);
+    });
+    
+    // data = sample(data, 500);
+
+    const xScale = d3.scaleTime().domain(d3.extent(data, d => d['year_published'])).range([10, chartWidth-10]);
+    const yScale = d3.scaleLinear().domain(d3.extent(data, d => d['average_rating'])).range([chartHeight-10, 10]);
+    const logScale = d3.scaleLog().domain(d3.extent(data, d => d['playing_time'])).range([0, 1]);
+    const colorScale =  d3.scaleSequential( d => d3.interpolateYlGnBu(logScale(d)) ); // how to do log color
+
+    let yAxis = d3.axisLeft(yScale); 
+    yAxisArea.append("g").attr("class", "y axis").call(yAxis);
+
+    let xAxis = d3.axisBottom(xScale); 
+    xAxisArea.append("g").attr("class", "x axis").call(xAxis);
+
+    // BEGIN LECTURE CODE
+      
+    // // Just to check, here's code to make SVG circles
+    // interactiveArea.selectAll("circle.point").data(data)
+    //                .join("circle").attr("class","point")
+    //                .attr("r", 3)
+    //                .attr("opacity",0.6)
+    //                .attr("cx", d => xScale(d['year_published']))
+    //                .attr("cy", d => yScale(d['average_rating']))
+    //                .attr("fill", d => colorScale(d['playing_time']))
+    // // It's fairly efficient, but recall our "dots on a map" example, which started getting slow
+    // // It only gets worse as you add more complex SVG elements
+                    
+    // Get the "drawing context" for the canvas
+    // This is the tool we use to modify the contents of the canvas -- think of it like a paintbrush
+    const context = canvas.node().getContext('2d');
+    context.clearRect(0, 0, width, height);
+    context.globalAlpha = 0.6;
+    data.forEach( (d,i) => {
+      let x = xScale(d['year_published']);
+      let y = yScale(d['average_rating']);
+      let rad = 3;
+      let color = colorScale(d['playing_time']);
+
+      context.fillStyle = color;
+      context.beginPath();
+      context.arc(x, y, rad, 0, 2*Math.PI);
+      context.fill();
+    });
+    
+    
+    
+    // NEXT LECTURE
+    // **  Add mouseovers to highlight points
+    
+
+
+  
+    
+
+
+
+
+  }
+  drawPlot();
+
+  </script>
+
+  
+  
+  
+  
+
+  <!--- calls the highlight library to fill the <pre> tag with code --->
+  <script>
+  
+  function sanitize(s) {
+    return s.replace("<br>", "\\n")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+          }
+    document.getElementById("display1").innerHTML = sanitize( document.getElementById("notes1").innerText);
+    hljs.highlightAll();
+  </script>
+
+
+  </div>
+</body>
+</html>
