@@ -1,208 +1,396 @@
 <html><head>
-<title>INFO 3300 - November 18</title>
-
-  <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
+  <title>INFO 3300 - November 18</title>
   
-  <link rel="stylesheet" type="text/css" href="../css/normalize.css">
-  <link rel="stylesheet" type="text/css" href="../css/skeleton.css">
-  <link rel="stylesheet" type="text/css" href="../css/custom-style.css">
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
-  <link rel="stylesheet" href="../css/hljs-base16.css">
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
-  
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  
-  <style>
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
     
-  
-  </style>
-
-</head>
-<body>
-  <div class="container larger">
-    <h3>Notes for November 18</h3>
-    <p>Today we'll look at raster graphics and vector graphics. <a href="https://designshack.net/articles/layouts/vector-vs-raster-what-do-i-use/">Here</a> is a small guide.</p>
-    <p>Here is some documentation on <a href="https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API">canvas elements</a>. In a later lecture we make use of d3-Delaunay, which is documented <a href="https://github.com/d3/d3-delaunay">here</a>.</p>
-    <p>Here are a few articles talking about SVG versus Canvas and choosing between them: <a href="https://www.sitepoint.com/canvas-vs-svg-choosing-the-right-tool-for-the-job/">1</a>, <a href="https://smus.com/canvas-vs-svg-performance/">2 (older)</a> </p>
-    <p>In addition to Canvas and SVG, there is also WebGL which has a few extra capabilities which are very handy. You can make use of fragment shaders for visual effects (and even <a href="http://glslsandbox.com/e#207.3">GPU computation</a>).
-    <p>You can <a href="http://bl.ocks.org/mbostock/5914438">mix the raster and vector together</a> with enough work!</p>
-    <p>Also, there are lots of helper libraries, including <a href="https://github.com/quantmind/d3-canvas-transition">this one</a> which enables .transition() on Canvas.</p>
-    <h5>HTML for today:</h5>
-
-
-    <p> Canvas Chart </p>
+    <link rel="stylesheet" type="text/css" href="../css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="../css/skeleton.css">
+    <link rel="stylesheet" type="text/css" href="../css/custom-style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+    <link rel="stylesheet" href="../css/hljs-base16.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
     
-    <div id="container" style="width: 800px; height: 500px;" >
-    </div>
-
-
-
-  <!-- This block will be automatically filled with syntax-highlighted code from the script below -->
-  <h5>Code for today:</h5>
-  <pre>
-    <code id="display1" class="hljs javascript">
-    </code>
-  </pre>
-
-
-  <script id="notes1">
-  
-  // UTILITY FUNCTIONS
-  // Here a slightly modified version of the sample function from underscore.js
-  // It is a very useful, MIT licensed JS utility library
-  // https://github.com/jashkenas/underscore
-  function sample(obj, n, guard) {
-    if (n == null || guard) {
-      if (!isArrayLike(obj)) obj = values(obj);
-      return obj[random(obj.length - 1)];
-    }
-    var sample = obj.slice();
-    var length = sample.length;
-    n = Math.max(Math.min(n, length), 0);
-    var last = length - 1;
-    for (var index = 0; index < n; index++) {
-      var rand = index + Math.floor(Math.random() * (last - index + 1))
-      var temp = sample[index];
-      sample[index] = sample[rand];
-      sample[rand] = temp;
-    }
-    return sample.slice(0, n);
-  }
-  
-
-  // BEGIN CLASS CODE
-  // Container that will hold the canvas and SVG overlay
-  const container = d3.select("#container").style("position","relative");
-  const width = Number(container.style("width").replace("px",""));
-  const height = Number(container.style("height").replace("px",""));
-  const margin = { top: 10, right: 10, bottom: 50, left:50};
-  const chartWidth = width - margin.left - margin.right;
-  const chartHeight = height - margin.top - margin.bottom;
-  
-  // Add a canvas element
-  const canvas = container.append("canvas")
-                          .attr("width",chartWidth)
-                          .attr("height",chartHeight)
-                          .style("position","absolute")
-                          .style("top",margin.top + 'px')
-                          .style("left",margin.left + 'px');
-  
-  // Layer SVG on top of the canvas so we can draw axes and make the canvas interactive
-  const svg = container.append("svg")
-                       .attr("width", width)
-                       .attr("height", height)
-                       .style("position","absolute")
-                       .style("top", 0)
-                       .style("left", 0);               
-  const yAxisArea = svg.append("g").attr("transform","translate("+(margin.left-2)+","+margin.top+")");
-  const xAxisArea = svg.append("g").attr("transform","translate("+margin.left+","+(chartHeight+2+margin.top)+")");
-  const label = svg.append("text").attr("x", margin.left+10).attr("y", margin.top+10);
-  
-  // Add our interactive area, which is just a transparent rect
-  // This will hold our mouseover highlights so we can do them without redrawing the whole canvas
-  const interactiveArea = svg.append("g").attr("transform","translate("+margin.left+","+margin.top+")");
-  interactiveArea.append("rect")
-                 .attr("width",chartWidth)
-                 .attr("height",chartHeight)
-                 .attr("x",0)
-                 .attr("y",0)
-                 .attr("opacity",0);         
-                
-                                   
-  const drawPlot = async () => {
-   
-    let data = await d3.csv("../datasets/board-games-simplified.csv");
-    console.log(data.length);
-
-    const parseTime = d3.timeParse("%Y");
-    data.forEach( (d, i) => {
-      d['year_published'] = parseTime(d['year_published']);
-      d['average_rating'] = Number(d['average_rating']);
-      d['playing_time'] = Number(d['playing_time']);
-    });
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     
-    // data = sample(data, 500);
-
-    const xScale = d3.scaleTime().domain(d3.extent(data, d => d['year_published'])).range([10, chartWidth-10]);
-    const yScale = d3.scaleLinear().domain(d3.extent(data, d => d['average_rating'])).range([chartHeight-10, 10]);
-    const logScale = d3.scaleLog().domain(d3.extent(data, d => d['playing_time'])).range([0, 1]);
-    const colorScale =  d3.scaleSequential( d => d3.interpolateYlGnBu(logScale(d)) ); // how to do log color
-
-    let yAxis = d3.axisLeft(yScale); 
-    yAxisArea.append("g").attr("class", "y axis").call(yAxis);
-
-    let xAxis = d3.axisBottom(xScale); 
-    xAxisArea.append("g").attr("class", "x axis").call(xAxis);
-
-    // BEGIN LECTURE CODE
+    <style>
       
-    // // Just to check, here's code to make SVG circles
-    // interactiveArea.selectAll("circle.point").data(data)
-    //                .join("circle").attr("class","point")
-    //                .attr("r", 3)
-    //                .attr("opacity",0.6)
-    //                .attr("cx", d => xScale(d['year_published']))
-    //                .attr("cy", d => yScale(d['average_rating']))
-    //                .attr("fill", d => colorScale(d['playing_time']))
-    // // It's fairly efficient, but recall our "dots on a map" example, which started getting slow
-    // // It only gets worse as you add more complex SVG elements
-                    
-    // Get the "drawing context" for the canvas
-    // This is the tool we use to modify the contents of the canvas -- think of it like a paintbrush
-    const context = canvas.node().getContext('2d');
-    context.clearRect(0, 0, width, height);
-    context.globalAlpha = 0.6;
-    data.forEach( (d,i) => {
-      let x = xScale(d['year_published']);
-      let y = yScale(d['average_rating']);
-      let rad = 3;
-      let color = colorScale(d['playing_time']);
+    
+    </style>
+  
+  </head>
+  <body>
+    <div class="container larger">
+      <h3>Notes for November 18</h3>
+      <p>Today we'll look at raster graphics and vector graphics. <a href="https://designshack.net/articles/layouts/vector-vs-raster-what-do-i-use/">Here</a> is a small guide.</p>
+      <p>Here is some documentation on <a href="https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API">canvas elements</a>. In a later lecture we make use of d3-Delaunay, which is documented <a href="https://github.com/d3/d3-delaunay">here</a>.</p>
+      <p>Here are a few articles talking about SVG versus Canvas and choosing between them: <a href="https://www.sitepoint.com/canvas-vs-svg-choosing-the-right-tool-for-the-job/">1</a>, <a href="https://smus.com/canvas-vs-svg-performance/">2 (older)</a> </p>
+      <p>In addition to Canvas and SVG, there is also WebGL which has a few extra capabilities which are very handy. You can make use of fragment shaders for visual effects (and even <a href="http://glslsandbox.com/e#207.3">GPU computation</a>).
+      <p>You can <a href="http://bl.ocks.org/mbostock/5914438">mix the raster and vector together</a> with enough work!</p>
+      <p>Also, there are lots of helper libraries, including <a href="https://github.com/quantmind/d3-canvas-transition">this one</a> which enables .transition() on Canvas.</p>
+      <h5>HTML for today:</h5>
+  
+  
+      <p> Canvas Chart </p>
+      
+      <div id="container" style="width: 800px; height: 500px;" >
+      </div>
+  
+  
+  
+    <!-- This block will be automatically filled with syntax-highlighted code from the script below -->
+    <h5>Code for today:</h5>
+    <pre>
+      <code id="display1" class="hljs javascript">
+      </code>
+    </pre>
+  
+  
+    <script id="notes1">
+    
+    // UTILITY FUNCTIONS
+    // Here a slightly modified version of the sample function from underscore.js
+    // It is a very useful, MIT licensed JS utility library
+    // https://github.com/jashkenas/underscore
+    function sample(obj, n, guard) {
+      if (n == null || guard) {
+        if (!isArrayLike(obj)) obj = values(obj);
+        return obj[random(obj.length - 1)];
+      }
+      var sample = obj.slice();
+      var length = sample.length;
+      n = Math.max(Math.min(n, length), 0);
+      var last = length - 1;
+      for (var index = 0; index < n; index++) {
+        var rand = index + Math.floor(Math.random() * (last - index + 1))
+        var temp = sample[index];
+        sample[index] = sample[rand];
+        sample[rand] = temp;
+      }
+      return sample.slice(0, n);
+    }
+    
+  
+    // BEGIN CLASS CODE
+    // Container that will hold the canvas and SVG overlay
+    const container = d3.select("#container").style("position","relative");
+    const width = Number(container.style("width").replace("px",""));
+    const height = Number(container.style("height").replace("px",""));
+    const margin = { top: 10, right: 10, bottom: 50, left:50};
+    const chartWidth = width - margin.left - margin.right;
+    const chartHeight = height - margin.top - margin.bottom;
+    
+    // Add a canvas element
+    const canvas = container.append("canvas")
+                            .attr("width",chartWidth)
+                            .attr("height",chartHeight)
+                            .style("position","absolute")
+                            .style("top",margin.top + 'px')
+                            .style("left",margin.left + 'px');
+    
+    // Layer SVG on top of the canvas so we can draw axes and make the canvas interactive
+    const svg = container.append("svg")
+                         .attr("width", width)
+                         .attr("height", height)
+                         .style("position","absolute")
+                         .style("top", 0)
+                         .style("left", 0);               
+    const yAxisArea = svg.append("g").attr("transform","translate("+(margin.left-2)+","+margin.top+")");
+    const xAxisArea = svg.append("g").attr("transform","translate("+margin.left+","+(chartHeight+2+margin.top)+")");
+    const label = svg.append("text").attr("x", margin.left+10).attr("y", margin.top+10);
+    
+    // Add our interactive area, which is just a transparent rect
+    // This will hold our mouseover highlights so we can do them without redrawing the whole canvas
+    const interactiveArea = svg.append("g").attr("transform","translate("+margin.left+","+margin.top+")");
+    interactiveArea.append("rect")
+                   .attr("width",chartWidth)
+                   .attr("height",chartHeight)
+                   .attr("x",0)
+                   .attr("y",0)
+                   .attr("opacity",0);         
+                  
+                                     
+    const drawPlot = async () => {
+     
+      let data = await d3.csv("../datasets/board-games-simplified.csv");
+      console.log(data.length);
+  
+      const parseTime = d3.timeParse("%Y");
+      data.forEach( (d, i) => {
+        d['year_published'] = parseTime(d['year_published']);
+        d['average_rating'] = Number(d['average_rating']);
+        d['playing_time'] = Number(d['playing_time']);
+      });
+      
+      // data = sample(data, 500);
+  
+      const xScale = d3.scaleTime().domain(d3.extent(data, d => d['year_published'])).range([10, chartWidth-10]);
+      const yScale = d3.scaleLinear().domain(d3.extent(data, d => d['average_rating'])).range([chartHeight-10, 10]);
+      const logScale = d3.scaleLog().domain(d3.extent(data, d => d['playing_time'])).range([0, 1]);
+      const colorScale =  d3.scaleSequential( d => d3.interpolateYlGnBu(logScale(d)) ); // how to do log color
+  
+      let yAxis = d3.axisLeft(yScale); 
+      yAxisArea.append("g").attr("class", "y axis").call(yAxis);
+  
+      let xAxis = d3.axisBottom(xScale); 
+      xAxisArea.append("g").attr("class", "x axis").call(xAxis);
+  
+      // BEGIN LECTURE CODE
+        
+      // // Just to check, here's code to make SVG circles
+      // interactiveArea.selectAll("circle.point").data(data)
+      //                .join("circle").attr("class","point")
+      //                .attr("r", 3)
+      //                .attr("opacity",0.6)
+      //                .attr("cx", d => xScale(d['year_published']))
+      //                .attr("cy", d => yScale(d['average_rating']))
+      //                .attr("fill", d => colorScale(d['playing_time']))
+      // // It's fairly efficient, but recall our "dots on a map" example, which started getting slow
+      // // It only gets worse as you add more complex SVG elements
+                      
+      // Get the "drawing context" for the canvas
+      // This is the tool we use to modify the contents of the canvas -- think of it like a paintbrush
+      const context = canvas.node().getContext('2d');
+      context.clearRect(0, 0, width, height);
+      context.globalAlpha = 0.6;
+      data.forEach( (d,i) => {
+        let x = xScale(d['year_published']);
+        let y = yScale(d['average_rating']);
+        let rad = 3;
+        let color = colorScale(d['playing_time']);
+  
+        context.fillStyle = color;
+        context.beginPath();
+        context.arc(x, y, rad, 0, 2*Math.PI);
+        context.fill();
+      });
+      
+      
+      
+      // NEXT LECTURE
+      // **  Add mouseovers to highlight points
+      
+      //   Now to add mouseovers to highlight points
+      // The issue here is that unlike in SVG, where we can attach an event to EACH circle element
+      // In a canvas, we just have pixels and can't really test which circle is which
+      // So we need to do more to figure out which circle is under the mouse when its at a given place
+      // One easy way to do this is to keep an array that maps pixel indices to pixel positions
+      //  (i.e. an array that's width x height in size and contains data[i] for the circle at array[x][y])
+      
+      // A nicer way to handle mouseovers might be to just find the circle that's closest to your mouse
+      //  This will produce results that are very similar to that of Bubble Cursor
+      // However, to find the closest point, you've got to compare your current positon with EVERY other point
+      //  For 10,000 points, that's incredibly inefficient
+      
+      // To make the "find the closest point" task more efficient, we'll use a Delaunay Triangulation
+      //  In effect, this does a bit of pre-computation for us, so that lookups are much faster
+      // This makes use of the d3-delaunay library, which has an efficient implementation
+      //  of the delaunay triangulation algorithm -- it's just a bit tricky to get working
+      // If you've seen a Voronoi Diagram, this is kind of the same thing
+      // (Another way to speed up the "closest point" task would be a quadtree like data structure, which
+      //  d3 also offers in a library for us -- I'd probably opt for a quadtree in an actual system unless
+      //  I wanted the bubble cursor behavior explicitly)
+      
+      // First make a delaunay triangulation
+      // The .from function works kind of like .x and .y, just give it accessor functions for x and y
+      const delaunay = d3.Delaunay.from(data, d => xScale(d['year_published']), d => yScale(d['average_rating']));
+      
+      // // We can use a voronoi tesselation to see the structure of the triangulation
+      // // You'll be able to see the cells that the triangulation "searches" when using .find()
+      // // UNCOMMENT FOLLOWING 2 LINES TO SEE CELLS
+      // const voronoi = delaunay.voronoi([0,0,chartWidth,chartHeight]);
+      // interactiveArea.append("path").attr("stroke","black").attr("fill","none")
+      //                .attr("d",voronoi.render())
+      
+      // // ORIGINAL version before we modified it for the pan-zoom handler
+      // // Since we don't have events for each circle, we need to simulate mouseOver and mouseOut
+      // // We'll make a little state machine to do this
+      // //  Initial state  cT=-1, when highlighting cT>-1, when done cT=-1
+      // // Note that we could handle cases where we switch between targets better than calling both
+      // //  mouseExited and mouseEntered, possibly by splitting up if(index !== currentTarget) to
+      // //  be more specific based on whether currentTarget is -1 or greater than -1
+      // let currentTarget = -1;
+      // interactiveArea.on("mousemove", mouseMoved);
+  
+      // function mouseMoved(event) {
+      //   let loc = d3.pointer(event);
+      //   let index;
+      //   if (currentTarget === -1) {
+      //     // Does a sweep of triangles, which should be O(sqrt(N)) in most cases
+      //     index = delaunay.find(loc[0],loc[1]);   // returns index of closest point
+      //   }
+      //   else {
+      //     // With a known point index that's nearby, you can speed up the lookups dramatically
+      //     index = delaunay.find(loc[0],loc[1],currentTarget)
+      //   }
+      //   // console.log(loc, index);
+      //
+      //   if (index !== currentTarget) {
+      //       // Make our "mouseover" function
+      //       console.log("mouseover");
+      //       currentTarget = index;
+      //       mouseExited();
+      //       mouseEntered(index);
+      //   }
+      // };
+      // // Also trigger "mouseout" when leaving interactive area
+      // interactiveArea.on("mouseout", () => {
+      //   currentTarget = -1;
+      //   mouseExited(); 
+      // })
+      //
+      // function mouseEntered(i) {
+      //   let d = data[i];
+      //   interactiveArea.append("circle")
+      //                 .attr("id","highlight")
+      //                 .attr("cx",xScale(d['year_published']))
+      //                 .attr("cy",yScale(d['average_rating']))
+      //                 .attr("r",5)
+      //                 .attr("stroke","black")
+      //                 .attr("fill","none");
+      //   label.text(d['name']);
+      //                
+      // }
+      // function mouseExited() {
+      //   d3.select("#highlight").remove();
+      //   label.text("");
+      // }
+  
+  
+      // TAKE 2 - Adding pan-zoom PLUS mouseovers
+      // This is going to require a more complex state machine
+      // We will start with just pan-zoom, then modify the mouseovers below
+    
+      var plotZoom = d3.zoom().on("zoom", zoomed);
+      interactiveArea.call(plotZoom);
+      
+      // As with other events, plotZoomed receives one parameter, *event*  (i.e. plotZoomed(event)  ) and can get *this*
+      function zoomed({ transform }) {    
+  
+        // Adjust tools to match new zoom level
+        let xModScale = transform.rescaleX(xScale);
+        let yModScale = transform.rescaleY(yScale);
+  
+        // Blank out the canvas and re-draw
+        context.clearRect(0, 0, width, height);
+        context.globalAlpha = 0.6;
+        data.forEach( (d,i) => {
+          let x = xModScale(d['year_published']);
+          let y = yModScale(d['average_rating']);
+          let rad = 3 * transform.k; // Or just leave as 3 to get different behavior
+          let color = colorScale(d['playing_time']);
+  
+          context.fillStyle = color;
+          context.beginPath();
+          context.arc(x, y, rad, 0, 2*Math.PI);
+          context.fill();
+        });
+  
+        // BONUS: we can add this to adjust the mouseover circle to match up with the new view
+        // Check state of the mouseover. If target is not -1, then we are mouseovering now
+        // Adjust the appearance of the highlight
+        if (currentTarget !== -1) {
+          let d = data[currentTarget];
+          interactiveArea.select("circle")
+                        .attr("cx",xModScale(d['year_published']))
+                        .attr("cy",yModScale(d['average_rating']))
+                        .attr("r",5 * transform.k) // or just leave as 5
+        }
+      }
+  
+      // Updating the mouseover to include the pan+zoom level
+      let currentTarget = -1;
+      interactiveArea.on("mousemove", mouseMoved);
+  
+      function mouseMoved(event) {
+        let transform = d3.zoomTransform(interactiveArea.node());
+  
+        let loc = d3.pointer(event);
+        loc = transform.invert(loc);
+  
+        let index;
+        if (currentTarget === -1) {
+          // Does a sweep of triangles, which should be O(sqrt(N)) in most cases
+          index = delaunay.find(loc[0],loc[1]);   // returns index of closest point
 
-      context.fillStyle = color;
-      context.beginPath();
-      context.arc(x, y, rad, 0, 2*Math.PI);
-      context.fill();
-    });
+          // BONUS:
+          //  If you want it to work ONLY when you are on top of a circle, this is a good place
+          //   for you to do a final distance check. Since we know that index is the closest
+          //   possible circle to our mouse, we can check just one distance. This is close to
+          //   how the Bubble Cursor would go about the job.
+          // E.g.   if ( distance(data[index], loc) < radius ) { -proceed to event- }
+        }
+        else {
+          // With a known point index that's nearby, you can speed up the lookups dramatically
+          index = delaunay.find(loc[0],loc[1],currentTarget)
+        }
+        // console.log(loc, index);
+  
+        if (index !== currentTarget) {
+            // Make our "mouseover" function
+            console.log("mouseover", index);
+            currentTarget = index;
+            mouseExited();
+            mouseEntered(index);
+        }
+      };
+      // Also trigger "mouseout" when leaving interactive area
+      interactiveArea.on("mouseout", () => {
+        currentTarget = -1;
+        mouseExited(); 
+      })
+      
+      function mouseEntered(i) {
+        let transform = d3.zoomTransform(interactiveArea.node());
+        let xModScale = transform.rescaleX(xScale);
+        let yModScale = transform.rescaleY(yScale);
+        
+        let d = data[i];
+        interactiveArea.append("circle")
+                      .attr("id","highlight")
+                      .attr("cx",xModScale(d['year_published']))
+                      .attr("cy",yModScale(d['average_rating']))
+                      .attr("r",5 * transform.k) // or just leave as 5
+                      .attr("stroke","black")
+                      .attr("fill","none");
+        label.text(d['name']);
+      }
+      function mouseExited() {
+        d3.select("#highlight").remove();
+        label.text("");
+      }
+  
+  
+  
+  
+  
+  
+    }
+    drawPlot();
+  
+    </script>
+  
     
     
     
-    // NEXT LECTURE
-    // **  Add mouseovers to highlight points
     
-
-
   
+    <!--- calls the highlight library to fill the <pre> tag with code --->
+    <script>
     
-
-
-
-
-  }
-  drawPlot();
-
-  </script>
-
+    function sanitize(s) {
+      return s.replace("<br>", "\\n")
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+            }
+      document.getElementById("display1").innerHTML = sanitize( document.getElementById("notes1").innerText);
+      hljs.highlightAll();
+    </script>
   
   
+    </div>
+  </body>
+  </html>
   
-  
-
-  <!--- calls the highlight library to fill the <pre> tag with code --->
-  <script>
-  
-  function sanitize(s) {
-    return s.replace("<br>", "\\n")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-          }
-    document.getElementById("display1").innerHTML = sanitize( document.getElementById("notes1").innerText);
-    hljs.highlightAll();
-  </script>
-
-
-  </div>
-</body>
-</html>
